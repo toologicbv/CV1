@@ -19,12 +19,16 @@ function [NR, ref_image, P, Q]=compute_surface_normals(IM, N, V, NR, P, Q)
             if sum(in) ~= 0
                 % construct diagonal matrix for 
                 I = diag(in);
+                d = I*in;
+                L = I*V;
                 % compute least square solution for this pixel
-                g = lsqlin(I*V, I*in); 
+                g = (L.'*L)\(L.'*d);    
                 % normalize g(x,y)
-                g_n = g ./ norm(g);
-                % replace 0/x=inf with 0
-                g_n(isinf(g_n))=0;
+                if norm(g) ~= 0
+                    g_n = g ./ norm(g);
+                else
+                    g_n = [0;0;0];
+                end
                 % store result
                 NR(i,j,:) = g_n;
                 % store reflectance image value
@@ -35,7 +39,7 @@ function [NR, ref_image, P, Q]=compute_surface_normals(IM, N, V, NR, P, Q)
             else
                 % measures from images are all zero, store zero vector
                 NR(i,j,:) = zeros(3,1);
-                ref_image(i,j) = zeros(3,1); % acutally redundant but for clarity
+                ref_image(i,j) = 0; % acutally redundant but for clarity
                 P(i,j) = 0; % wrt x
                 Q(i,j) = 0; % wrt y
             end
