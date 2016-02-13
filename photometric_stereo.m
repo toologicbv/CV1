@@ -1,25 +1,27 @@
 function photometric_stereo()
-
-    load_yn = false;
+    
     % number of light sources/images
     N = 5;
-    dim1 = 512;
-    dim2 = 512;
+    % scaling factor for unit source vectors
     k_factors = ones(N,1);
+    % this value gives good results
     k_factors(:) = 1.34;
+    % construct the light source vectors
     V = construct_source_vectors(k_factors);
     % load images, last parameter indicates whether or not 
     % to normalize the pixel values
-    IM = read_images(dim1, dim2, N, false);
-    [rho, NR, P, Q] = initialize(dim1, dim2, N);
+    [IM, dim1, dim2] = read_images(N, false);
+    % initialize matrix for surface normals, x and y partial derivatives
+    % necessary for the reconstruction of the shape
+    [NR, P, Q] = initialize(dim1, dim2);
+    % compute the surface normals
+    [NR, ref_image, P, Q] = compute_surface_normals(IM, N, V, NR, P, Q);
     
-    if load_yn
-        load bigMat.mat
-    else
-        [NR, ref_image, P, Q] = compute_surface_normals(IM, N, V, NR, P, Q);
-    end
     % show reflectance image that we reconstructed
-    % imshow(ref_image)
+    figure(1);
+    imshow(ref_image)
+    title('Reflectance of surface based on g(x,y)')
+    drawnow;
     % show surface normals
     show_surf_normals(NR, 16)
     depth_map = compute_depth_map(P, Q);
@@ -27,38 +29,40 @@ function photometric_stereo()
     
     function [V]=construct_source_vectors(k_factors)
         % We assume 5 light source directions for each pixel in the image
-        % (1) frontal (2) left-above (3) right-above (4) left-below
-        % (5) right-below
-        % further we assume the light source is far away
+        % (1) frontal (2) below right (3) below left (4) right above
+        % (5) left above
+        % further we assume the light source is at infinity
         % input parameters:
         % (1) k_factors: the scaling factor per direction of the
         %                light source that we don't know. Assuming
         %                input is a column vector
-        % im1 = front, below right, below left, right above, left above
-        %s1 = [0.1 0.1 0.9]; s2 = [0.78 -0.6 0]; s3 = [-0.78 -0.6 0];
-        %s4 = [0.78 0.6 0]; s5 = [-0.78 0.6 0]; 
+        % returns:
+        % V matrix of scaled unit source vectors
+        
         s1 = [0.1 0.1 0.9]; s2 = [0.9 -0.9 0.1]; s3 = [-0.9 -0.9 0.1];
         s4 = [0.9 0.9 0.1]; s5 = [-0.9 0.9 0.1]; 
         s1 = s1 ./ norm(s1); s2 = s2 ./ norm(s2); s3 = s3 ./ norm(s3);
         s4 = s4 ./ norm(s4); s5 = s5 ./ norm(s5);
+        % stack matrix
         S = [s1; s2; s3; s4; s5];
-        %S = [0 0 sqrt(3); 1 -1 0; -1 -1 0; 1 1 0;-1 1  0] .* 1/sqrt(3);
-       
+        % compute V matrix
         V = repmat(k_factors, 1, 3) .* S;
       
     end % construct_source_vectors
 
-    function [IM]=read_images(dim1, dim2, N, normalize)
+    function [IM,d1,d2]=read_images(N, normalize)
         % read all images into a multi dimensional matrix
         % third dimension is image index number
         % input parameters:
-        % (1) dim1: x-dim of image
-        % (2) dim2: y-dim of image
-        % (3) N: number of images
-        % (4) normalize: true/false whether or not to normalize
+        % (1) N: number of images
+        % (2) normalize: true/false whether or not to normalize
         %                pixel values
-        % returns 3-dim matrix IM (dim1, dim2, N)
-        IM = zeros(dim1, dim2, N, 'uint8');
+        % returns:
+        % 3-dim matrix IM (dim1, dim2, N)
+        % x and y dimension of image(s)
+        i1 = imread('sphere1.png');
+        [d1, d2, ~] = size(i1);
+        IM = zeros(d1, d2, N, 'uint8');
         for i=1:N
             i_file = ['sphere', num2str(i), '.png'];
             i1 = imread(i_file);
@@ -69,37 +73,40 @@ function photometric_stereo()
             end
         end
         
-        
     end % read_images
 
-    function [rho, NR, P, Q]=initialize(dim1, dim2, N)
+    function [NR, P, Q]=initialize(dim1, dim2)
         % initialize the empty matrices for the unknowns we have to
         % calculate
         % input parameters:
         % (1, 2) dim1/dim2: dimension of images
-        %                N: number of images
-        % albedo for each pixel
-        rho = zeros(dim1, dim2, N, 'uint8');
-        % Surface normal for each pixel (contains 3 values/pixel)
+        % returns:     
+        % NR: initialized matrix that stores the surface normals
+        % P: matrix that stores the partial derivatives wrt x for each
+        % pixel
+        % Q: matrix that stores the partial derivatives wrt y for each
+        % pixel
         NR = zeros(dim1, dim2, 3);
-        % matrix of derivatives w.r.t. x and y dim
         P = zeros(dim1, dim2);
         Q = zeros(dim1, dim2);
         
     end % initialize
 
-    function show_surf_normals(NR, step)
-        
+    function show_surf_normals(NR, sample_step)
+        % input parameters
+        % (1) NR: matrix that stores the surface normals
+        % (2) sample_step: step size for sampling pixels
         [height, width, ~] = size(NR);
 
-        [X, Y] = meshgrid(1:step:height, width:-step:1);
-        U = NR(1:step:height, 1:step:width, 1);
-        V = NR(1:step:height, 1:step:width, 2);
-        W = NR(1:step:height, 1:step:width, 3);
+        [X, Y] = meshgrid(1:sample_step:height, width:-sample_step:1);
+        U = NR(1:sample_step:height, 1:sample_step:width, 1);
+        V = NR(1:sample_step:height, 1:sample_step:width, 2);
+        W = NR(1:sample_step:height, 1:sample_step:width, 3);
 
-        h = figure;
+        figure(2);
         quiver3(X, Y, zeros(size(X)), U, V, W);
-        % view([0, 90]);
+        view([0, 75]);
+        title('Surface normals');
         drawnow;
 
     end % show_surf_normals
@@ -131,23 +138,22 @@ function photometric_stereo()
                 d_map(row,col) = d_map(row,col-1) + P(row,col);
             end
         end
-        save('depth_map', 'd_map');
         
     end % compute_depth_map
 
     function show_reconstructed_shape(d_map, sample_step)
         % input parameters
         % (1) d_map: depth_map of reconstructed shape
-        
+        % (2) sample_step: step size for sampling pixels
         [height, width, ~] = size(d_map);
 
         [X, Y] = meshgrid(1:sample_step:height, width:-sample_step:1);
         d_m = d_map(1:sample_step:height, 1:sample_step:width);
-        figure();
+        figure(3);
         colormap(gray);
         surf(X,Y,d_m)
-        % axis off;
-        % axis equal;
+        title('Reconstructed shape')
+
     end % show_reconstructed_shape
 
 end % end of function photometric_stereo
