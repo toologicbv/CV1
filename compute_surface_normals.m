@@ -37,12 +37,12 @@ function [NR, ref_image, P, Q]=compute_surface_normals(IM, N, V, NR, P, Q)
                 % store reflectance image value
                 ref_image(i,j) = norm(g);
                 % store the partial derivatives P=wrt-x ; Q=wrt-y
-                P(i,j) = g(1) / g(3); % wrt x
-                Q(i,j) = g(2) / g(3); % wrt y
+                P(i,j) = -g(1) / g(3); % wrt x
+                Q(i,j) = -g(2) / g(3); % wrt y
             else
                 % measures from images are all zero, store zero vector
                 NR(i,j,:) = zeros(3,1);
-                ref_image(i,j) = 0; % acutally redundant but for clarity
+                ref_image(i,j) = 0; % actually redundant but for clarity
                 P(i,j) = 0; % wrt x
                 Q(i,j) = 0; % wrt y
             end

@@ -22,8 +22,8 @@ function photometric_stereo()
     % imshow(ref_image)
     % show surface normals
     show_surf_normals(NR, 16)
-    % depth_map = compute_depth_map(P, Q);
-    % show_reconstructed_shape(depth_map, 16);
+    depth_map = compute_depth_map(P, Q);
+    show_reconstructed_shape(depth_map, 16);
     
     function [V]=construct_source_vectors(k_factors)
         % We assume 5 light source directions for each pixel in the image
@@ -111,21 +111,24 @@ function photometric_stereo()
         % returns:
         % depth matrix
         
-        N = size(P,1);
-        M = size(P,2);
-        d_map = zeros(N, M, 1);
+        % assuming P and Q have the same dim values
+        rows = size(P,1);
+        cols = size(P,2);
+        d_map = zeros(rows, cols);
         
         % upper left corner is zero and remains zero
-        for y=1:M
-            for x=2:N
-                % sum for each column over the y-derivs
-                d_map(x,y) = d_map(x-1,y) + Q(x,y);
-            end
+        % sum for each pixel in the left most column the y-derivs
+        % (q-values)
+        for row=2:rows
+            d_map(row,1) = d_map(row-1,1) + Q(row,1);
         end
+       
         % sum for each row over the x-derivs
-        for x=1:N
-            for y=2:M
-                d_map(x,y) = d_map(x,y-1) + P(x,y);
+        for row=1:rows
+            % for each pixel in the row, except the first cell sum the
+            % x-derivative values
+            for col=2:cols
+                d_map(row,col) = d_map(row,col-1) + P(row,col);
             end
         end
         save('depth_map', 'd_map');
@@ -139,8 +142,10 @@ function photometric_stereo()
         [height, width, ~] = size(d_map);
 
         [X, Y] = meshgrid(1:sample_step:height, width:-sample_step:1);
-        h2 = figure();
-        surf(d_map)
+        d_m = d_map(1:sample_step:height, 1:sample_step:width);
+        figure();
+        colormap(gray);
+        surf(X,Y,d_m)
         % axis off;
         % axis equal;
     end % show_reconstructed_shape
