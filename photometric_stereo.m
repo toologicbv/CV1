@@ -6,7 +6,7 @@ function photometric_stereo()
     dim1 = 512;
     dim2 = 512;
     k_factors = ones(N,1);
-    k_factors(:) = 0.76;
+    k_factors(:) = 1.34;
     V = construct_source_vectors(k_factors);
     % load images, last parameter indicates whether or not 
     % to normalize the pixel values
@@ -35,9 +35,15 @@ function photometric_stereo()
         %                light source that we don't know. Assuming
         %                input is a column vector
         % im1 = front, below right, below left, right above, left above
-        S = [0 0 sqrt(3); 1 -1 0; -1 -1 0; 1 1 0;-1 1  0] .* 1/sqrt(3);
-        % S = [ 0 0 1; 1/sqrt(2) 1/sqrt(2) 0; 1/sqrt(2) -1/sqrt(2) 0; ...
-        %    -1/sqrt(2) -1/sqrt(2) 0; -1/sqrt(2) 1/sqrt(2) 0]; 
+        %s1 = [0.1 0.1 0.9]; s2 = [0.78 -0.6 0]; s3 = [-0.78 -0.6 0];
+        %s4 = [0.78 0.6 0]; s5 = [-0.78 0.6 0]; 
+        s1 = [0.1 0.1 0.9]; s2 = [0.9 -0.9 0.1]; s3 = [-0.9 -0.9 0.1];
+        s4 = [0.9 0.9 0.1]; s5 = [-0.9 0.9 0.1]; 
+        s1 = s1 ./ norm(s1); s2 = s2 ./ norm(s2); s3 = s3 ./ norm(s3);
+        s4 = s4 ./ norm(s4); s5 = s5 ./ norm(s5);
+        S = [s1; s2; s3; s4; s5];
+        %S = [0 0 sqrt(3); 1 -1 0; -1 -1 0; 1 1 0;-1 1  0] .* 1/sqrt(3);
+       
         V = repmat(k_factors, 1, 3) .* S;
       
     end % construct_source_vectors
@@ -46,8 +52,12 @@ function photometric_stereo()
         % read all images into a multi dimensional matrix
         % third dimension is image index number
         % input parameters:
-        % (1) N: number of images
-        % returns 3-dim matrix
+        % (1) dim1: x-dim of image
+        % (2) dim2: y-dim of image
+        % (3) N: number of images
+        % (4) normalize: true/false whether or not to normalize
+        %                pixel values
+        % returns 3-dim matrix IM (dim1, dim2, N)
         IM = zeros(dim1, dim2, N, 'uint8');
         for i=1:N
             i_file = ['sphere', num2str(i), '.png'];
@@ -77,7 +87,6 @@ function photometric_stereo()
         Q = zeros(dim1, dim2);
         
     end % initialize
-
 
     function show_surf_normals(NR, step)
         

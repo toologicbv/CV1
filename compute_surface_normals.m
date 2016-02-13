@@ -15,14 +15,17 @@ function [NR, ref_image, P, Q]=compute_surface_normals(IM, N, V, NR, P, Q)
     ref_image = zeros(size(NR,1), size(NR,2), 'uint8');
     for i=1:x_num_p
         for j=1:y_num_p
+            % get the pixel values from all N images
+            % and stack them together in a column vector
             in = reshape(double(IM(i,j,:)), N, 1);
             if sum(in) ~= 0
                 % construct diagonal matrix for 
                 I = diag(in);
                 d = I*in;
                 L = I*V;
+                % d = in; L = V;
                 % compute least square solution for this pixel
-                g = (L.'*L)\(L.'*d);    
+                g = (L.'*L)\(L.'*d);  
                 % normalize g(x,y)
                 if norm(g) ~= 0
                     g_n = g ./ norm(g);
