@@ -29,8 +29,7 @@ function show_cspace_channels(image, cspace)
         i1(:,:,1) = (IM(:,:,1) - IM(:,:,2)) / sqrt(2);
         i1(:,:,2) = (IM(:,:,1) + IM(:,:,2) - (2 .* IM(:,:,3))) / sqrt(6);
         i1(:,:,3) = (IM(:,:,1) + IM(:,:,2) + IM(:,:,3)) / sqrt(3);  
-        figure(1); % create a figure window 
-        imshow(i1);
+        plot_color_space_channels(i1, cspace, nColor);
     elseif strcmpi(cspace, 'HSV')
         nColor = 3;
         i2 = rgb2hsv(IM);
@@ -50,6 +49,8 @@ function show_cspace_channels(image, cspace)
         title(['Colorspace ', cspace, ' / channel ', num2str(2)]);
         subplot(2,2,3), imshow(im(:, :, 3))  
         title(['Colorspace ', cspace, ' / channel ', num2str(3)]);
+        subplot(2,2,4), imshow(im())  
+        title(['Colorspace full images']);
     end % plot_color_space_channels
     
 end % show_cspace_channels

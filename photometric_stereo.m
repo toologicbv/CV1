@@ -33,7 +33,9 @@ function photometric_stereo()
     
     function [V]=construct_source_vectors(k_factors)
         % We assume 5 light source directions for each pixel in the image
-        % (1) frontal (2) below right (3) below left (4) right above
+        % (1) frontal 
+        % (2) below right 
+        % (3) below left (4) right above
         % (5) left above
         % further we assume the light source is at infinity
         % input parameters:
@@ -43,10 +45,21 @@ function photometric_stereo()
         % returns:
         % V matrix of scaled unit source vectors
         
-        s1 = [0.1 0.1 0.9]; s2 = [0.9 -0.9 0.1]; s3 = [-0.9 -0.9 0.1];
-        s4 = [0.9 0.9 0.1]; s5 = [-0.9 0.9 0.1]; 
-        s1 = s1 ./ norm(s1); s2 = s2 ./ norm(s2); s3 = s3 ./ norm(s3);
-        s4 = s4 ./ norm(s4); s5 = s5 ./ norm(s5);
+        % proces of a lot of trail and error with source vectors gave the
+        % best results 
+        s1 = [0.1 0.1 0.9];
+        s2 = [0.9 -0.9 0.1]; 
+        s3 = [-0.9 -0.9 0.1];
+        s4 = [0.9 0.9 0.1]; 
+        s5 = [-0.9 0.9 0.1];
+        
+        
+        s1 = s1 ./ norm(s1); 
+        s2 = s2 ./ norm(s2); 
+        s3 = s3 ./ norm(s3);
+        s4 = s4 ./ norm(s4); 
+        s5 = s5 ./ norm(s5);
+        
         % stack matrix
         S = [s1; s2; s3; s4; s5];
         % compute V matrix
@@ -69,6 +82,7 @@ function photometric_stereo()
         IM = zeros(d1, d2, N, 'uint8');
         for i=1:N
             i_file = ['sphere', num2str(i), '.png'];
+            
             i1 = imread(i_file);
             if normalize
                 IM(:,:,i) = (i1-min(i1(:))) ./ (max(i1(:)-min(i1(:))));
