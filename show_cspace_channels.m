@@ -28,9 +28,9 @@ function show_cspace_channels(image, cspace)
         i1 = zeros(size(IM,1), size(IM,2), size(IM,3));
         i1(:,:,1) = (IM(:,:,1) - IM(:,:,2)) / sqrt(2);
         i1(:,:,2) = (IM(:,:,1) + IM(:,:,2) - (2 .* IM(:,:,3))) / sqrt(6);
-        i1(:,:,3) = (IM(:,:,1) + IM(:,:,2) + IM(:,:,3)) / 3.;  
-        plot_color_space_channels(i1, cspace, nColor);
-    
+        i1(:,:,3) = (IM(:,:,1) + IM(:,:,2) + IM(:,:,3)) / sqrt(3);  
+        figure(1); % create a figure window 
+        imshow(i1);
     elseif strcmpi(cspace, 'HSV')
         nColor = 3;
         i2 = rgb2hsv(IM);
@@ -44,13 +44,12 @@ function show_cspace_channels(image, cspace)
     end % evaluate colorspace model
     
     function plot_color_space_channels(im, cspace, nColor)
-        
-        for i=1:nColor
-           figure(i);
-           imshow(im(:, :, i));
-           title(['Colorspace ', cspace, ' / channel ', num2str(i)]);
-        end
-        
+        subplot(2,2,1), imshow(im(:, :, 1))
+        title(['Colorspace ', cspace, ' / channel ', num2str(1)]);
+        subplot(2,2,2), imshow(im(:, :, 2))
+        title(['Colorspace ', cspace, ' / channel ', num2str(2)]);
+        subplot(2,2,3), imshow(im(:, :, 3))  
+        title(['Colorspace ', cspace, ' / channel ', num2str(3)]);
     end % plot_color_space_channels
     
 end % show_cspace_channels
