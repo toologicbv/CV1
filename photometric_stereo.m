@@ -1,4 +1,8 @@
 function photometric_stereo()
+    % Computer Vision 1, Assignment 1
+    % Implementation of photometric stereo, February 2016
+    % Jörg Sander, 10881530
+    % Maurits Bleeker, 10694439
     
     % number of light sources/images
     N = 5;
