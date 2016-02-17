@@ -59,5 +59,5 @@ function [NR, ref_image, P, Q]=compute_surface_normals(IM, N, V, NR, P, Q)
             end
         end
     end
-  
+
 end % compute_Surface_Normals

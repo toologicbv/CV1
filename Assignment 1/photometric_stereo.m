@@ -9,7 +9,7 @@ function photometric_stereo()
     % scaling factor for unit source vectors
     k_factors = ones(N,1);
     % this value gives good results
-    k_factors(:) = 1.34;
+    k_factors(:) = 1.2;
     % construct the light source vectors
     V = construct_source_vectors(k_factors);
     % load images, last parameter indicates whether or not 
@@ -27,15 +27,13 @@ function photometric_stereo()
     title('Reflectance of surface based on g(x,y)')
     drawnow;
     % show surface normals
-    show_surf_normals(NR, 16)
     depth_map = compute_depth_map(P, Q);
+    show_surf_normals(NR, depth_map, P, Q, 16)
     show_reconstructed_shape(depth_map, 16);
     
     function [V]=construct_source_vectors(k_factors)
         % We assume 5 light source directions for each pixel in the image
-        % (1) frontal 
-        % (2) below right 
-        % (3) below left (4) right above
+        % (1) frontal (2) below right (3) below left (4) right above
         % (5) left above
         % further we assume the light source is at infinity
         % input parameters:
@@ -45,21 +43,12 @@ function photometric_stereo()
         % returns:
         % V matrix of scaled unit source vectors
         
-        % proces of a lot of trail and error with source vectors gave the
-        % best results 
-        s1 = [0.1 0.1 0.9];
-        s2 = [0.9 -0.9 0.1]; 
-        s3 = [-0.9 -0.9 0.1];
-        s4 = [0.9 0.9 0.1]; 
-        s5 = [-0.9 0.9 0.1];
-        
-        
-        s1 = s1 ./ norm(s1); 
-        s2 = s2 ./ norm(s2); 
-        s3 = s3 ./ norm(s3);
-        s4 = s4 ./ norm(s4); 
-        s5 = s5 ./ norm(s5);
-        
+        %s1 = [0.1 0.1 0.9]; s2 = [0.9 -0.9 0.1]; s3 = [-0.9 -0.9 0.1];
+        %s4 = [0.9 0.9 0.1]; s5 = [-0.9 0.9 0.1]; 
+        s1 = [0.0 0.0 1.0]; s2 = [1.0 -1.0 0]; s3 = [-1.0 -1.0 0];
+        s4 = [1.0 1.0 0]; s5 = [-1.0 1.0 0]; 
+        s1 = s1 ./ norm(s1); s2 = s2 ./ norm(s2); s3 = s3 ./ norm(s3);
+        s4 = s4 ./ norm(s4); s5 = s5 ./ norm(s5);
         % stack matrix
         S = [s1; s2; s3; s4; s5];
         % compute V matrix
@@ -82,7 +71,6 @@ function photometric_stereo()
         IM = zeros(d1, d2, N, 'uint8');
         for i=1:N
             i_file = ['sphere', num2str(i), '.png'];
-            
             i1 = imread(i_file);
             if normalize
                 IM(:,:,i) = (i1-min(i1(:))) ./ (max(i1(:)-min(i1(:))));
@@ -110,19 +98,23 @@ function photometric_stereo()
         
     end % initialize
 
-    function show_surf_normals(NR, sample_step)
+    function show_surf_normals(NR, depth_map, P, Q, sample_step)
         % input parameters
         % (1) NR: matrix that stores the surface normals
         % (2) sample_step: step size for sampling pixels
+        
+        NR=second_derivative_test(NR, P, Q);
         [height, width, ~] = size(NR);
 
         [X, Y] = meshgrid(1:sample_step:height, width:-sample_step:1);
-        U = NR(1:sample_step:height, 1:sample_step:width, 1);
-        V = NR(1:sample_step:height, 1:sample_step:width, 2);
-        W = NR(1:sample_step:height, 1:sample_step:width, 3);
+        d_map = depth_map(1:sample_step:height, 1:sample_step:width);
+        u1 = NR(1:sample_step:height, 1:sample_step:width, 1);
+        u2 = NR(1:sample_step:height, 1:sample_step:width, 2);
+        u3 = NR(1:sample_step:height, 1:sample_step:width, 3);
 
         figure(2);
-        quiver3(X, Y, zeros(size(X)), U, V, W);
+        % quiver3(X, Y, zeros(size(X)), u1, u2, u3);
+        quiver3(X, Y, d_map, u1, u2, u3);
         view([0, 75]);
         title('Surface normals');
         drawnow;
@@ -159,6 +151,22 @@ function photometric_stereo()
         
     end % compute_depth_map
 
+    function NR=second_derivative_test(NR, P, Q)
+        
+        [x_dim, y_dim] = size(P);
+        d_filter = [-1 0 1];
+        d_xy = conv2(P, d_filter);
+        d_yx = conv2(Q, d_filter');
+        size(d_xy)
+        size(d_yx)
+        % due to convolution "padding" we omit 2 dimensions
+        d_diff = abs(d_xy(:, 2:x_dim+1) - d_yx(2:x_dim+1, :));
+        % threshold is 2nd derivative diffs greater than 1.
+        % those normals will be abandoned...set to zero
+        NR( d_diff > 1.) = 0;
+        
+    end % 2nd_derivative_test
+
     function show_reconstructed_shape(d_map, sample_step)
         % input parameters
         % (1) d_map: depth_map of reconstructed shape
@@ -168,7 +176,7 @@ function photometric_stereo()
         [X, Y] = meshgrid(1:sample_step:height, width:-sample_step:1);
         d_m = d_map(1:sample_step:height, 1:sample_step:width);
         figure(3);
-        colormap(gray);
+        colormap(spring);
         surf(X,Y,d_m)
         title('Reconstructed shape')
 
