@@ -8,11 +8,13 @@ function imOut = gaussianConv(image_path , sigma_x , sigma_y, kernel_length)
 % returns:
 % imOut: the convolved image
 
+% in this version we first slide the 1D filter over the image
+% in the x direction and then in the y direction
 GX = gaussian(sigma_x, kernel_length);
 GY = gaussian(sigma_y', kernel_length);
 im = imread(image_path);
 im = im2double(im);
-imOut = conv2(im, GX);
-imOut = conv2(imOut, GY);
+imOut = conv2(im, GX, 'same');
+imOut = conv2(imOut, GY, 'same');
 
 end % gaussianConv
