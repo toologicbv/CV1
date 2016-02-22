@@ -10,8 +10,8 @@ function [imOut, Gd]=gaussianDer(image_path ,G, sigma)
 % (2) Gd:
 
 [~, kernel_length] = size(G);
-min_range = -kernel_length/2.;
-max_range = kernel_length/2.;
+min_range = -(kernel_length - 1)/2.;
+max_range = (kernel_length - 1)/2.;
 x = linspace(min_range, max_range, kernel_length);
 Gd = -(x ./ sigma^2) .* G;
 imIn = im2double(imread(image_path));
