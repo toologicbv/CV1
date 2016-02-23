@@ -1,0 +1,32 @@
+Computer Visions 1 - Lab assignment 2
+=================================
+Maurits Bleeker - 10694439
+Jörg Sander - 108815
+
+
+Question 1.1:
+=============================
+gaussian.m
+
+additional helper function to compare fspecial shapes:
+comp_fspecials.m
+
+Question 1.2:
+=============================
+gaussianConv.m
+
+we made a separate function called gaussianConv2d that convolves with a 2D filter once:
+gaussianConv2d.m
+
+this function plots a surface with the absolute differences of the two methods
+plot_diff_1D_2D_conv.m
+
+Question 1.3:
+============================
+gaussianDer.m
+
+This script plots the Gaussian first order derivative
+plot_gauss_der.m
+
+This functions plots the "zebra-edges" for different sizes of sigma
+plot_zebra_edges.m

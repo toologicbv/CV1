@@ -1,7 +1,7 @@
 % plot zebra edges with different sigma's
 
 i_org = imread('zebra.png');
-sigmas = [0.4, 0.9 1.5 2 4 5.5];
+sigmas = [0.9 1.5 2 3 4 5.5];
 imOut = {};
 for i=1:numel(sigmas)
     [imOut{i} , Gd] = gaussianDer2('zebra.png', 11, sigmas(i));
