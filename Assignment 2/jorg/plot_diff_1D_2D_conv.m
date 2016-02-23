@@ -9,7 +9,7 @@ function plot_diff_1D_2D_conv(image_path, sigma, kernel_length)
     % perform two times 1D convolution and one 2D convolution
     imOut1 = gaussianConv(image_path, sigma, sigma, kernel_length);
     imOut2 = gaussianConv2d(image_path, sigma, kernel_length);
-    % take the differences and plot the results 
+    % take the differences and plot the results, take the different bewteen a 2d conv filter and 2 times the 1d filter 
     diff_1d_2d = abs(imOut1 - imOut2);
     [height, width] = size(diff_1d_2d);
     sample_size = 2;

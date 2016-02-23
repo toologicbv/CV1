@@ -9,6 +9,7 @@ function comp_fspecials(image_path, sigma, kernel_length)
     subplot(3, 2, 1);
     imshow(im);
     title('original');
+    % loop over the conv2 function options and make a subplot
     for i=1:numel(types)
         subplot(3, 2, i+1);
         im_c = conv2(im, G, types{i});
