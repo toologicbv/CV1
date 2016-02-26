@@ -1,4 +1,4 @@
-function [ H, r, c, Ix, Iy] = HarrisCorners(image_path, sigma)
+function [ H, r, c, Ix, Iy, IG, corners] = HarrisCorners(image_path, sigma)
 % Function that detects corners based on Harris Corner
 % detector
 % input parameters:
@@ -13,9 +13,9 @@ function [ H, r, c, Ix, Iy] = HarrisCorners(image_path, sigma)
     k = 0.04;
     % window size for non-max suppression
     % NOTE, window size must be an ODD number
-    n = 11;
+    n = 15;
     % threshold for non-max supression
-    max_threshold = -2000;
+    max_threshold = 1000;
     % determine kernel length based on sigma
     % http://stackoverflow.com/questions/23832852/by-which-measures-should-i-set-the-size-of-my-gaussian-filter-in-matlab
     kernel_length = floor(6*sigma) + 1;
@@ -35,10 +35,17 @@ function [ H, r, c, Ix, Iy] = HarrisCorners(image_path, sigma)
     % WHICH CONV2 shape type should we use? SAME?
     [Ix, Gd] = gaussianDer(im_in, G, sigma);
     [Iy, Gd] = gaussianDer(im_in, G', sigma);
-    % compute Ix^2: first square and then smooth again with G in x-direction
+    % calculate the gradient, can be used to check which edges
+    % are highlighted
+    IG = sqrt(Ix.^2 + Iy.^2);
+    IG = rescale_image(IG);
+    % rescale the x and y derivatives in order to display the
+    % edges properly
     nIx = rescale_image(Ix);
     nIy = rescale_image(Iy);
     
+    % wrap values of derivatives that are negative due to convolution
+    % with gaussian derivative
     A = Ix.^2;
     C = Iy.^2;
     B = Ix .* Iy; 
@@ -47,12 +54,14 @@ function [ H, r, c, Ix, Iy] = HarrisCorners(image_path, sigma)
     nC = rescale_image(C) .* 255;
     
     H = ((nA .* nC) - nB.^2) - ( k .* (nA + nC).^2);
+    % H = ((A .* C) - B.^2) - ( k .* (A + C).^2);
     % non-maximum suppression
     [corners, c, r] = get_corners(H, n, max_threshold);
+    corners = rescale_image(corners);
     
     % nIx = rescale_image(Ix);
     % nIy = rescale_image(Iy);
-    plot_derivative_images(im_in_org, Ix, Iy, r, c);
+    plot_derivative_images(im_in_org, nIx, nIy, IG, r, c);
     
     function imout=rescale_image(im_in)
         
@@ -87,18 +96,18 @@ function [ H, r, c, Ix, Iy] = HarrisCorners(image_path, sigma)
         end
     end 
     
-    function plot_derivative_images(i1, i2, i3, r, c)
+    function plot_derivative_images(i1, i2, i3, i4, r, c)
         
-        figure
-        
-        subplot(2,2,2);
-        %i2 = im2bw(i2, threshold);
+        figure 
+        subplot(2,2,3);
         imshow(i2);
         title('Ix derivative');
-        subplot(2,2,3);
-        %i3 = im2bw(i3, threshold);
+        subplot(2,2,4);
         imshow(i3);
         title('Iy derivative');
+        subplot(2,2,2);
+        imshow(i4);
+        title('gradient');
         subplot(2,2,1);
         imshow(i1);
         hold on;
