@@ -1,19 +1,21 @@
-function [ H, r, c, Ix, Iy, IG, corners] = HarrisCorners(image_path, sigma)
+function [ H, r, c, Ix, Iy, IG, corners] = HarrisCorners(image_path, sigma, w_size)
 % Function that detects corners based on Harris Corner
 % detector
 % input parameters:
 % (1) image_path: path to the image
-% 
+% (2) sigma: standard deviation
+% (3) w_size: size of the sliding window (must be an odd number)
 % output parameters:
 % (1) H: matrix of second order derivatives
 % (2) r: row numbers of the detected corners
 % (3) c: column numbers of the detected corners
 
-    % set "empirical" constant k
+    % set constant k (somewhere between 0.04-0.06)
     k = 0.04;
     % window size for non-max suppression
     % NOTE, window size must be an ODD number
-    n = 15;
+    % tested with n = 15
+    n = w_size;
     % threshold for non-max supression
     max_threshold = 1000;
     % determine kernel length based on sigma
