@@ -1,0 +1,147 @@
+function [ H, r, c] = HarrisCornersDetector(image_path, sigma, w_size)
+% Function that detects corners based on Harris Corner
+% detector
+% input parameters:
+% (1) image_path: path to the image
+% (2) sigma: standard deviation
+% (3) w_size: size of the sliding window (must be an odd number)
+% output parameters:
+% (1) H: matrix of second order derivatives
+% (2) r: row numbers of the detected corners
+% (3) c: column numbers of the detected corners
+
+    % set constant k (somewhere between 0.04-0.06)
+    k = 0.04;
+    % window size for non-max suppression
+    % NOTE, window size must be an ODD number
+    % tested with n = 15
+    n = w_size;
+    % threshold for non-max supression
+    % with smaller window size effect is that more edges on playmobile
+    % figure are found
+    % results (1) playmobil figure with telefone
+    % ===============================================
+    % e.g. sigma = 1.4 threshold = 3.5 w_size 35/55 <<<=== best results so
+    % far
+    % e.g. sigma = 1.6 threshold = 4 w_size 35/55
+    % e.g. sigma = 2.5 threshold = 3500-5000 w_szie 55
+    % e.g. sigma = 1.8 threshold = 1000 w_szie 55
+    max_threshold = 3.5;
+    % results (2) ping pong figure with ball
+    % e.g. sigma = 1.4 threshold = 3.5 w_size 25
+    
+    
+    % determine kernel length based on sigma
+    % http://stackoverflow.com/questions/23832852/by-which-measures-should-i-set-the-size-of-my-gaussian-filter-in-matlab
+    half_k_length = floor(3*sigma) + 1;
+    
+    % load original image
+    im_in_org = im2double(imread(image_path));
+    [y_size, x_size, channels] = size(im_in_org);
+    % if image is not in grayscale, convert from (assumed) RGB to grayscale
+    if channels > 1
+        im_in = rgb2gray(im_in_org);
+    else
+        im_in = im_in_org;
+    end
+    [xx, yy] = meshgrid(-half_k_length:half_k_length, -half_k_length:half_k_length);
+
+    Gxy = exp(-(xx .^ 2 + yy .^ 2) / (2 * sigma ^ 2));
+
+    Gx = xx .* exp(-(xx .^ 2 + yy .^ 2) / (2 * sigma ^ 2));
+    Gy = yy .* exp(-(xx .^ 2 + yy .^ 2) / (2 * sigma ^ 2));
+    
+    Ix = conv2(im_in, Gx, 'same');
+    Iy = conv2(im_in, Gy, 'same');
+    % rescale the x and y derivatives in order to display the
+    % edges properly
+    nIx = rescale_image(Ix);
+    nIy = rescale_image(Iy);
+    
+    % compute the ingredients of the auto-correlation matrices
+    Ix2 = Ix.^2;
+    Iy2 = Iy.^2;
+    Ixy = Ix .* Iy; 
+    
+    Sx2 = conv2(Ix2, Gxy, 'same');
+    Sy2 = conv2(Iy2, Gxy, 'same');
+    Sxy = conv2(Ixy, Gxy, 'same');
+
+    % compute eigenvalues per pixel
+    H = zeros(y_size, x_size);
+    for row=1:y_size
+        for col=1:x_size
+            % construct H matrix for this pixel (x,y)
+            Qxy = [Sx2(row,col) Sxy(row,col); Sxy(row,col) Sy2(row,col) ];
+            H(row,col) = det(Qxy) - k * (trace(Qxy)^2);
+        end
+    end
+    
+    % calculate the gradient, can be used to check which edges
+    % are highlighted
+    IG = sqrt(Ix2 + Iy2);
+    IG = rescale_image(IG);
+    % non-maximum suppression
+    [corners, c, r] = get_corners(H, n, max_threshold);
+
+    plot_derivative_images(im_in_org, nIx, nIy, IG, r, c);
+    
+    function imout=rescale_image(im_in)
+        
+        im_min = min(im_in(:));
+        im_max = max(im_in(:));
+        imout = (im_in + abs(im_min)) ./ (im_max + abs(im_min));
+    end
+   
+
+    function [corners, c, r]=get_corners(H, n, threshold)
+        
+        r = []; c = [];
+        half =  (n-1)/2;
+        modified_H = padarray(H, [half half]);
+        corners = zeros(size(H,1), size(H,2));
+        % construct utility vectors in range 1 to n
+        x = (1:n);
+        y = (1:n);
+        
+        for i = half:size(H,1)
+            for j = half:size(H,2)
+               value = H(i,j);
+               w = modified_H((x + i - half),(y + j - half));
+               max_value = max(w(:));
+               if value == max_value && value >= threshold
+                    corners(i,j) = value;
+                    r = [r, i];
+                    c = [c, j];   
+               else
+                   corners(i,j) = 0; 
+               end
+            end 
+        end
+    end 
+    
+    function plot_derivative_images(i1, i2, i3, i4, r, c)
+        
+        figure 
+        subplot(2,2,3);
+        imshow(i2);
+        title('Ix derivative');
+        subplot(2,2,4);
+        imshow(i3);
+        title('Iy derivative');
+        subplot(2,2,2);
+        imshow(i4);
+        title('gradient');
+        subplot(2,2,1);
+        imshow(i1);
+        hold on;
+        % it is odd but we have to change rows and columns, seems like
+        % the plot uses reversed axis, checked our corners procedure
+        % and my observation is that it works fine
+        plot(c, r, 'ro')
+        title('original');
+        
+    end % plot_derivative_images
+
+end
+
