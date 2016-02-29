@@ -44,12 +44,12 @@ function [ H, r, c] = HarrisCornersDetector(image_path, sigma, w_size)
     else
         im_in = im_in_org;
     end
-    [xx, yy] = meshgrid(-half_k_length:half_k_length, -half_k_length:half_k_length);
+    [x, y] = meshgrid(-half_k_length:half_k_length, -half_k_length:half_k_length);
 
-    Gxy = exp(-(xx .^ 2 + yy .^ 2) / (2 * sigma ^ 2));
+    Gxy = exp(-(x.^2 + y.^2) / (2 * sigma^2));
 
-    Gx = xx .* exp(-(xx .^ 2 + yy .^ 2) / (2 * sigma ^ 2));
-    Gy = yy .* exp(-(xx .^ 2 + yy .^ 2) / (2 * sigma ^ 2));
+    Gx = x .* exp(-(x.^2 + y.^2) / (2 * sigma^2));
+    Gy = y .* exp(-(x.^2 + y.^2) / (2 * sigma^2));
     
     Ix = conv2(im_in, Gx, 'same');
     Iy = conv2(im_in, Gy, 'same');
@@ -63,19 +63,13 @@ function [ H, r, c] = HarrisCornersDetector(image_path, sigma, w_size)
     Iy2 = Iy.^2;
     Ixy = Ix .* Iy; 
     
-    Sx2 = conv2(Ix2, Gxy, 'same');
-    Sy2 = conv2(Iy2, Gxy, 'same');
-    Sxy = conv2(Ixy, Gxy, 'same');
+    % convolve again in x and y direction
+    Ix2 = conv2(Ix2, Gxy, 'same');
+    Iy2 = conv2(Iy2, Gxy, 'same');
+    Ixy = conv2(Ixy, Gxy, 'same');
 
-    % compute eigenvalues per pixel
-    H = zeros(y_size, x_size);
-    for row=1:y_size
-        for col=1:x_size
-            % construct H matrix for this pixel (x,y)
-            Qxy = [Sx2(row,col) Sxy(row,col); Sxy(row,col) Sy2(row,col) ];
-            H(row,col) = det(Qxy) - k * (trace(Qxy)^2);
-        end
-    end
+    % compute "cornerness" of each pixel
+    H = ((Ix2 .* Iy2) - Ixy.^2) - ( k .* (Ix2 + Iy2).^2);
     
     % calculate the gradient, can be used to check which edges
     % are highlighted
@@ -101,13 +95,13 @@ function [ H, r, c] = HarrisCornersDetector(image_path, sigma, w_size)
         modified_H = padarray(H, [half half]);
         corners = zeros(size(H,1), size(H,2));
         % construct utility vectors in range 1 to n
-        x = (1:n);
-        y = (1:n);
+        xx = (1:n);
+        yy = (1:n);
         
         for i = half:size(H,1)
             for j = half:size(H,2)
                value = H(i,j);
-               w = modified_H((x + i - half),(y + j - half));
+               w = modified_H((xx + i - half),(yy + j - half));
                max_value = max(w(:));
                if value == max_value && value >= threshold
                     corners(i,j) = value;
