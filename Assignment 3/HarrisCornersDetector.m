@@ -21,14 +21,14 @@ function [ H, r, c] = HarrisCornersDetector(image_path, sigma, w_size)
     % figure are found
     % results (1) playmobil figure with telefone
     % ===============================================
-    % e.g. sigma = 1.4 threshold = 3.5 w_size 35/55 <<<=== best results so
+    % e.g. sigma = 1.4 threshold = 3.5 w_size 17 <<<=== best results so
     % far
     % e.g. sigma = 1.6 threshold = 4 w_size 35/55
     % e.g. sigma = 2.5 threshold = 3500-5000 w_szie 55
     % e.g. sigma = 1.8 threshold = 1000 w_szie 55
     max_threshold = 3.5;
     % results (2) ping pong figure with ball
-    % e.g. sigma = 1.4 threshold = 3.5 w_size 25
+    % e.g. sigma = 1.4 threshold = 3.5 w_size 17 <<<=== best results so far
     
     
     % determine kernel length based on sigma
@@ -46,10 +46,12 @@ function [ H, r, c] = HarrisCornersDetector(image_path, sigma, w_size)
     end
     [x, y] = meshgrid(-half_k_length:half_k_length, -half_k_length:half_k_length);
 
+    % smoothing filter in x and y direction
     Gxy = exp(-(x.^2 + y.^2) / (2 * sigma^2));
-
-    Gx = x .* exp(-(x.^2 + y.^2) / (2 * sigma^2));
-    Gy = y .* exp(-(x.^2 + y.^2) / (2 * sigma^2));
+    % gaussian first derivative in resp. x and y-direction
+    % deliberately ommited the normalizing factor
+    Gx = -x .* exp(-(x.^2 + y.^2) / (2 * sigma^2));
+    Gy = -y .* exp(-(x.^2 + y.^2) / (2 * sigma^2));
     
     Ix = conv2(im_in, Gx, 'same');
     Iy = conv2(im_in, Gy, 'same');
