@@ -1,0 +1,41 @@
+function [ output_args ] = lucas_kanade_algorithm( img_1_path, img_2_path, sigma )
+
+    % convert images to double 
+    img_1 = im2double(imread(img_1_path));
+    img_2 = im2double(imread(img_2_path));
+
+    if (size(img_1,1) ~= size(img_2,1)) | (size(img_1,2) ~= size(img_2,2))
+        error('input is not the same');
+    end;
+    if (size(img_1,3) ~= 1) || (size(img_2,3) ~= 1)
+        img_1 = rgb2gray(img_1);
+        img_2 = rgb2gray(img_2);
+    end;
+    window_size = 15:
+    % determine kernel length based on sigma
+    % http://stackoverflow.com/questions/23832852/by-which-measures-should-i-set-the-size-of-my-gaussian-filter-in-matlab
+    kernel_length = floor(6*sigma) + 1;
+    % create 1D kernel
+    G = fspecial('gaussian', [1 kernel_length], sigma);
+    
+    [Ix, Gd] = gaussianDer(img_1, G, sigma);
+    [Iy, Gd] = gaussianDer(img_1, G', sigma);
+    It = imabsdiff(img_1, img_2);
+    
+    Ix = Ix(1:(floor(size(img_1, 1) / window_size)* window_size) , 1:(floor(size(img_1, 2) / window_size)*window_size));
+    Iy = Ix(1:(floor(size(img_1, 1) / window_size)* window_size) , 1:(floor(size(img_1, 2) / window_size)*window_size));
+    It = Ix(1:(floor(size(img_1, 1) / window_size)* window_size) , 1:(floor(size(img_1, 2) / window_size)*window_size));
+    
+    x_blocks = floor(size(img_1, 1) / window_size);
+    y_blocks = floor(size(img_1, 2) / window_size);
+    
+    
+    x_block_length(1:x_blocks) = window_size;
+    y_block_length(1:y_blocks) = window_size;
+    
+    im_x_blocks = mat2cell(Ix, x_block_length,y_block_length);
+	im_y_blocks = mat2cell(Iy, x_block_length,y_block_length);
+    im_t_blocks = mat2cell(It, x_block_length,y_block_length);
+
+end
+
