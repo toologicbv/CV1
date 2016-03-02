@@ -60,7 +60,6 @@ function LucasKanadeAlgorithm( img_1_path, img_2_path)
             index = index + 1;
         end 
     end 
-    
     figure
     quiver(V(:,1),V(:,2), V(:,3), V(:,4));
     axis off;

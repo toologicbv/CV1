@@ -10,6 +10,8 @@ function [] = lucas_kanade_algorithm( img_1_path, img_2_path, sigma )
     % convert images to double values
     img_1 = im2double(imread(img_1_path));
     img_2 = im2double(imread(img_2_path));
+    
+    
    
     % check if both images have the same dimentions
     if (size(img_1,1) ~= size(img_2,1)) | (size(img_1,2) ~= size(img_2,2))
@@ -30,12 +32,13 @@ function [] = lucas_kanade_algorithm( img_1_path, img_2_path, sigma )
     kernel_length = floor(6*sigma) + 1;
     
     % create 1D kernel
-    G = fspecial('gaussian', [1 kernel_length], sigma);
+    G = fspecial('gaussian', [1 kernel_length + 1], sigma);
     
     % derivative in x and y direction of the images
     [Ix, Gd] = gaussianDer(img_1, G, sigma);
     [Iy, Gd] = gaussianDer(img_1, G', sigma);
-    It = imabsdiff(img_1, img_2);
+    
+    It = imabsdiff(img_2, img_1);
 
     % resize the images so that it fits exactly n times the window size
     Ix = Ix(1:(floor(size(img_1, 1) / window_size)* window_size) , 1:(floor(size(img_1, 2) / window_size)*window_size));
@@ -76,11 +79,11 @@ function [] = lucas_kanade_algorithm( img_1_path, img_2_path, sigma )
         % calculate V = [u v] for a given window
         Ix_block = reshape(Ix_block, (size(Ix_block, 1)*size(Ix_block, 2)),1);
         Iy_block = reshape(Iy_block, (size(Iy_block, 1)*size(Iy_block, 2)),1);
-        It_block = reshape(It_block, (size(It_block, 1)*size(It_block, 2)),1)
+        It_block = reshape(It_block, (size(It_block, 1)*size(It_block, 2)),1);
         
         A = [Ix_block, Iy_block];
         b =  -1 .* It_block;
-        V = (inv(A' * A) * A') * b;
+        V = inv(A' * A) * A' * b;
     end 
 end
 
