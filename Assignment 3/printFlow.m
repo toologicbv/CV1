@@ -3,8 +3,10 @@ function printFlow(dir_path, search_mask, out_path)
     sigma = 1.4;
     w_size = 15;
     threshold = 3.5;
-    search_mask = [dir_path, search_mask];
+    search_mask = [dir_path, search_mask]
     
+    %vidObjects = VideoWriter('track.avi');
+    %open(vidObjects);
     files = dir(search_mask);
     % load first image and determine corner pixels to track
     inFilename = [dir_path, files(1).name];
@@ -25,6 +27,8 @@ function printFlow(dir_path, search_mask, out_path)
         [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, w_size);
         imshow(i2); hold on;
         plot(new_c, new_r, 'ro');
+        frame = getframe;
+        %vidObjects(writerObj, frame);
         outFileName = [out_path, files(i).name];
         saveas( gcf, outFileName, 'jpg' );
         i1 = i2;
