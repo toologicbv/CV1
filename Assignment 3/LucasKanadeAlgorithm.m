@@ -1,4 +1,4 @@
-function LucasKanadeAlgorithm( img_1_path, img_2_path)
+function [V]=LucasKanadeAlgorithm( img_1_path, img_2_path)
     % Function that calculate optical flow for two imput images 
     % detector
     % input parameters:
@@ -60,6 +60,7 @@ function LucasKanadeAlgorithm( img_1_path, img_2_path)
             index = index + 1;
         end 
     end 
+    
     figure
     quiver(V(:,1),V(:,2), V(:,3), V(:,4));
     axis off;
@@ -71,8 +72,7 @@ function LucasKanadeAlgorithm( img_1_path, img_2_path)
         
         A = [Ix_block, Iy_block];
         b =  -1 .* It_block;
-        % changed to pinv instead of inv
-        V = pinv(A' * A) * (A'* b);
+        V = pinv(A) * b;
     end 
 
     function [I_x, I_y, I_t]=computeIntensityDerivs(im1, im2)
@@ -88,8 +88,12 @@ function LucasKanadeAlgorithm( img_1_path, img_2_path)
         ft_t = 1/4 * [ 1  1; 1 1];
         ctype = 'same';
         
-        I_x = conv2(im1, ft_x, ctype) + conv2(im2, ft_x, ctype);
-        I_y = conv2(im1, ft_y, ctype) + conv2(im2, ft_y, ctype);
+        % how to calculate the derivatives. Only for image 1 in both
+        % directions?
+        I_x = conv2(im1, ft_x, ctype); %+ conv2(im2, ft_x, ctype);
+        I_y = conv2(im1, ft_y, ctype); %+ conv2(im2, ft_y, ctype);
+        % I_t is just the intensity difference for each pixel between image
+        % 1 and 2
         I_t = conv2(im1, ft_t, ctype) + conv2(im2, (-1 * ft_t), ctype);
         
     end % computeIntensityDerivs
