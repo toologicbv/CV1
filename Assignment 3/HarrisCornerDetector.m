@@ -1,4 +1,4 @@
-function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size, plot_yn)
+function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size, threshold, plot_yn)
 % Function that detects corners based on Harris Corner
 % detector
 % input parameters:
@@ -25,7 +25,7 @@ function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size, plot_yn)
     % e.g. sigma = 1.6 threshold = 4 w_size 35/55
     % e.g. sigma = 2.5 threshold = 3500-5000 w_szie 55
     % e.g. sigma = 1.8 threshold = 1000 w_szie 55
-    max_threshold = 3.5;
+    max_threshold = threshold;
     % results (2) ping pong figure with ball
     % e.g. sigma = 1.4 threshold = 3.5 w_size 17 <<<=== best results so far
     

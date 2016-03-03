@@ -2,6 +2,7 @@ function printFlow(dir_path, search_mask, out_path)
     % 
     sigma = 1.4;
     w_size = 15;
+    threshold = 3.5;
     search_mask = [dir_path, search_mask];
     
     files = dir(search_mask);
@@ -9,7 +10,7 @@ function printFlow(dir_path, search_mask, out_path)
     inFilename = [dir_path, files(1).name];
     i1 = im2double(imread(inFilename));
     img_1 = convertIfNeccessary(i1);
-    [ H, r, c] = HarrisCornerDetector(inFilename, sigma, w_size, false);
+    [ H, r, c] = HarrisCornerDetector(inFilename, sigma, w_size, threshold, false);
     % show image 1, plot corner points and save image to file
     imshow(i1); hold on;
     plot(c, r, 'ro');
