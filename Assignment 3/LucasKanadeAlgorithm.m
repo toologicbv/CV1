@@ -25,6 +25,8 @@ function [V]=LucasKanadeAlgorithm( img_1_path, img_2_path)
     % window size for this function is 15
     window_size = 15;
     
+    % Compute Ix (x direction derivitive), Iy (y direction derivitive) and
+    % It
     [Ix, Iy, It] = computeIntensityDerivs(img_1, img_2);
 
     % resize the images so that it fits exactly n times the window size
@@ -37,6 +39,8 @@ function [V]=LucasKanadeAlgorithm( img_1_path, img_2_path)
     x_blocks = floor(size(img_1, 1) / window_size);
     y_blocks = floor(size(img_1, 2) / window_size);
     
+    % create a vector for the function mat2cell with [15 15 ...], the
+    % length for every cell in the x and y direction of length window size 
     x_block_length(1:x_blocks) = window_size;
     y_block_length(1:y_blocks) = window_size;
     
@@ -48,6 +52,7 @@ function [V]=LucasKanadeAlgorithm( img_1_path, img_2_path)
     
     V = zeros((x_blocks * y_blocks), 4);
     index = 1;
+    % loop over every window block in the images
     for i=1:x_blocks
         for j =1:y_blocks
             % select the values for every block
@@ -55,15 +60,17 @@ function [V]=LucasKanadeAlgorithm( img_1_path, img_2_path)
             Iy_block = Iy_blocks{i,j};
             It_block = It_blocks{i,j};
             
-            V_block = calculate_v(Ix_block,Iy_block,It_block);
-            V(index,:) = [i j V_block(1) V_block(1)];
+            V_block = calculate_v(Ix_block,Iy_block,It_block); % Get V = [u v] for every window in the images
+            V(index,:) = [((j * window_size)- 7.5) ((i * window_size) - 7.5) V_block(1) V_block(1)];
             index = index + 1;
         end 
     end 
     
     figure
+    imshow(imread(img_2_path));
+    hold on;
     quiver(V(:,1),V(:,2), V(:,3), V(:,4));
-    axis off;
+    
     function V = calculate_v(Ix_block, Iy_block, It_block)
         % calculate V = [u v] for a given window
         Ix_block = reshape(Ix_block, (size(Ix_block, 1)*size(Ix_block, 2)),1);
@@ -89,12 +96,8 @@ function [V]=LucasKanadeAlgorithm( img_1_path, img_2_path)
         ctype = 'same';
         
         I_x = conv2(im1, ft_x, ctype); 
-        I_y = conv2(im1, ft_y, ctype); 
-        % I_t is just the intensity difference for each pixel between image
-        % 1 and 2
+        I_y = conv2(im1, ft_y, ctype);
         I_t = conv2(im1, ft_t, ctype) + conv2(im2, (-1 * ft_t), ctype);
-        
     end % computeIntensityDerivs
-
 end
 
