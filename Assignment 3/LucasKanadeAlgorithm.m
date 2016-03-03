@@ -88,10 +88,8 @@ function [V]=LucasKanadeAlgorithm( img_1_path, img_2_path)
         ft_t = 1/4 * [ 1  1; 1 1];
         ctype = 'same';
         
-        % how to calculate the derivatives. Only for image 1 in both
-        % directions?
-        I_x = conv2(im1, ft_x, ctype); %+ conv2(im2, ft_x, ctype);
-        I_y = conv2(im1, ft_y, ctype); %+ conv2(im2, ft_y, ctype);
+        I_x = conv2(im1, ft_x, ctype); 
+        I_y = conv2(im1, ft_y, ctype); 
         % I_t is just the intensity difference for each pixel between image
         % 1 and 2
         I_t = conv2(im1, ft_t, ctype) + conv2(im2, (-1 * ft_t), ctype);

@@ -1,4 +1,4 @@
-function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size)
+function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size, plot_yn)
 % Function that detects corners based on Harris Corner
 % detector
 % input parameters:
@@ -48,7 +48,7 @@ function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size)
     % smoothing filter in x and y direction
     Gxy = exp(-(x.^2 + y.^2) / (2 * sigma^2));
     % gaussian first derivative in resp. x and y-direction
-    % deliberately ommited the normalizing factor
+    % deliberately ommitted the normalizing factor
     Gx = -x .* exp(-(x.^2 + y.^2) / (2 * sigma^2));
     Gy = -y .* exp(-(x.^2 + y.^2) / (2 * sigma^2));
     
@@ -64,7 +64,7 @@ function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size)
     Iy2 = Iy.^2;
     Ixy = Ix .* Iy; 
     
-    % convolve again in x and y direction (summing up 
+    % convolve again in x and y direction (summing up the terms)
     Ix2 = conv2(Ix2, Gxy, 'same');
     Iy2 = conv2(Iy2, Gxy, 'same');
     Ixy = conv2(Ixy, Gxy, 'same');
@@ -76,20 +76,26 @@ function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size)
     % are highlighted
     IG = sqrt(Ix2 + Iy2);
     IG = rescale_image(IG);
-    % non-maximum suppression
-    [corners, c, r] = getLocalMaxima(H, w_size, max_threshold);
-
-    plot_derivative_images(im_in_org, nIx, nIy, IG, r, c);
+    % perform non-maximum suppression
+    [c, r] = getLocalMaxima(H, w_size, max_threshold);
+    % suppress corner points that are to close to image edges
+    %[r, c]=suppressPointsAtEdges(r, c, y_size, x_size, w_size);
+    % plot the results in a 2x2 subplot
+    % we deliberately added an image with the intensity gradients in order
+    % to heighlight the contours for "edge detection"
+    if plot_yn
+        plot_derivative_images(im_in_org, nIx, nIy, IG, r, c);
+    end
     
     function imout=rescale_image(im_in)
         
         im_min = min(im_in(:));
         im_max = max(im_in(:));
         imout = (im_in + abs(im_min)) ./ (im_max + abs(im_min));
-    end
+    end % rescale_image
    
 
-    function [corners, c, r]=getLocalMaxima(H, w_size, threshold)
+    function [c, r]=getLocalMaxima(H, w_size, threshold)
         % finds the local maxima of a patch and uses 
         % non-maximal supression to find the corner points
         % input:
@@ -97,9 +103,8 @@ function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size)
         % (2) patch size (assume quadratic)
         % (3) threshold for non maximal supression
         % returns
-        % (1) image matrix after non maximal supression (not really necessary)
-        % (2) column coordinate value
-        % (3) row coordinate value
+        % (1) column coordinate value
+        % (2) row coordinate value
         r = []; c = [];
         half =  (w_size - 1)/2;
         % pad the Harris reponse matrix and initialize the corner matrix
@@ -108,24 +113,39 @@ function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size)
         % construct utility vectors in range 1 to n
         xx = (1:w_size);
         yy = (1:w_size);
-        
+        % loop through response matrix and perform non-maxima suppression
         for i = half:size(H,1)
             for j = half:size(H,2)
+               % intensity value of the presumed corner point
                value = H(i,j);
+               % construct patch around corner point
                w = modified_H((xx + i - half),(yy + j - half));
+               % determine maximum value of patch
                max_value = max(w(:));
                % non-maximal supression
                if value == max_value && value >= threshold
+                   % found corner, store x and y coordinates
                     corners(i,j) = value;
                     r = [r, i];
                     c = [c, j];   
                else
+                   % not a corner
                    corners(i,j) = 0; 
                end
             end 
         end
     end 
-    
+
+    function [r, c]=suppressPointsAtEdges(r, c, max_rows, max_cols, w_size)
+    % Ignore corner points that are to close to edges of image
+        half_w_size = floor((w_size - 1) / 2);
+        indexes = find( r <= (max_rows - half_w_size) & r > half_w_size & ...
+            c <= (max_cols -  half_w_size) & c > half_w_size );
+        r = r(indexes);
+        c = c(indexes);
+        
+    end % suppressPointsAtEdges
+
     function plot_derivative_images(i1, i2, i3, i4, r, c)
         
         figure 
@@ -141,9 +161,7 @@ function [ H, r, c] = HarrisCornerDetector(image_path, sigma, w_size)
         subplot(2,2,1);
         imshow(i1);
         hold on;
-        % it is odd but we have to change rows and columns, seems like
-        % the plot uses reversed axis, checked our corners procedure
-        % and my observation is that it works fine
+        % plot the corner points as red circles
         plot(c, r, 'ro')
         title('original');
         
