@@ -35,8 +35,8 @@ function [u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path)
     % Compute Ix (x direction derivitive), Iy (y direction derivitive) and
     % It
     % [Ix, Iy, It] = computeIntensityDerivs(img_1, img_2);
-    [Ix, Iy, It] = computeIntensityDerivs(img_1, img_2);
-    % [Ix, Iy, It]=computeWithGausDerivatives(img_1, img_2, 1);
+    %[Ix, Iy, It] = computeIntensityDerivs(img_1, img_2);
+    [Ix, Iy, It]=computeWithGausDerivatives(img_1, img_2, 1);
     % initialize matrices for the result of the displacements
     
     [X, Y] = meshgrid(w_off+1:w_size:size(Ix,2)-w_off, w_off+1:w_size:size(Ix,1)-w_off);
@@ -73,13 +73,13 @@ function [u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path)
     hold on;
     quiver(X, Y, u, v, 'y')    
 
-    function [Ix, Iy, It]=computeWithGausDerivatives(im1, im2, sigma)
+    function [Ix, Iy, It]= computeWithGausDerivatives(im1, im2, sigma)
        
         k_length = floor((6 * sigma) + 1);
         G = fspecial('gaussian', [1 k_length], sigma);
         [~, Gd]=gaussianDer(im1 ,G, sigma);
-        Ix = conv2(im1, Gd, 'valid');
-        Iy = conv2(im1, Gd', 'valid');
+        Ix = conv2(im1, Gd, 'same');
+        Iy = conv2(im1, Gd', 'same');
         It = imabsdiff(im2, im1);
     end
 
