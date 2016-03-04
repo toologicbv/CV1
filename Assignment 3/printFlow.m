@@ -2,7 +2,7 @@ function printFlow(in_path, search_mask, out_path)
     % 
     sigma = 1.4;
     w_size = 15;
-    threshold = 0.02;
+    threshold = 3.5;
     search_mask = [in_path, search_mask];
     
     files = dir(search_mask);

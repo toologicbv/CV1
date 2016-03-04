@@ -44,6 +44,7 @@ function [ H, r, c] = HarrisCornersDetector(image_path, sigma, w_size)
     else
         im_in = im_in_org;
     end
+    %im_in =  imgaussfilt(im_in,3);
     [x, y] = meshgrid(-half_k_length:half_k_length, -half_k_length:half_k_length);
 
     % smoothing filter in x and y direction
@@ -134,7 +135,7 @@ function [ H, r, c] = HarrisCornersDetector(image_path, sigma, w_size)
         % it is odd but we have to change rows and columns, seems like
         % the plot uses reversed axis, checked our corners procedure
         % and my observation is that it works fine
-        plot(c, r, 'ro')
+        plot(c, r, 'ro');
         title('original');
         
     end % plot_derivative_images
