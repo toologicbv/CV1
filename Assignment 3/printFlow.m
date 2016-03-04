@@ -1,15 +1,13 @@
-function printFlow(dir_path, search_mask, out_path)
+function printFlow(in_path, search_mask, out_path)
     % 
     sigma = 1.4;
     w_size = 15;
-    threshold = 3.5;
-    search_mask = [dir_path, search_mask]
+    threshold = 0.02;
+    search_mask = [in_path, search_mask];
     
-    %vidObjects = VideoWriter('track.avi');
-    %open(vidObjects);
     files = dir(search_mask);
     % load first image and determine corner pixels to track
-    inFilename = [dir_path, files(1).name];
+    inFilename = [in_path, files(1).name];
     i1 = im2double(imread(inFilename));
     img_1 = convertIfNeccessary(i1);
     [ H, r, c] = HarrisCornerDetector(inFilename, sigma, w_size, threshold, false);
@@ -21,17 +19,17 @@ function printFlow(dir_path, search_mask, out_path)
     % start looping through files, starting with second image
     for i=2:length(files)
         close all;
-        inFilename = [dir_path, files(i).name];     
+        inFilename = [in_path, files(i).name];     
         i2 = im2double(imread(inFilename));
         img_2 = convertIfNeccessary(i2);
         [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, w_size);
         imshow(i2); hold on;
         plot(new_c, new_r, 'ro');
-        frame = getframe;
-        %vidObjects(writerObj, frame);
         outFileName = [out_path, files(i).name];
         saveas( gcf, outFileName, 'jpg' );
         i1 = i2;
+        r = new_r;
+        c = new_c;
     end
     close all;
     
