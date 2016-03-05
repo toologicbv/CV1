@@ -1,5 +1,5 @@
 function printFlow(in_path, search_mask, out_path)
-    % 
+    
     sigma = 1.4;
     w_size = 15;
     threshold = 3.5;

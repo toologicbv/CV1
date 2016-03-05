@@ -34,9 +34,13 @@ function [u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path)
     w_off = floor( (w_size - 1) / 2);
     % Compute Ix (x direction derivitive), Iy (y direction derivitive) and
     % It
-    % [Ix, Iy, It] = computeIntensityDerivs(img_1, img_2);
-    %[Ix, Iy, It] = computeIntensityDerivs(img_1, img_2);
-    [Ix, Iy, It]=computeWithGausDerivatives(img_1, img_2, 1);
+    % For this function there are two options using IntensityDerivs or
+    % GaussianDerivs, IntensityDerivs are used because they give much
+    % better results. The other option is still available
+    [Ix, Iy, It] = computeIntensityDerivs(img_1, img_2);
+   
+    %Other option GausDerivatives in comments 
+    %[Ix, Iy, It]=computeWithGausDerivatives(img_1, img_2, 1);
     % initialize matrices for the result of the displacements
     
     [X, Y] = meshgrid(w_off+1:w_size:size(Ix,2)-w_off, w_off+1:w_size:size(Ix,1)-w_off);
@@ -58,12 +62,13 @@ function [u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path)
             A = [Ix_b Iy_b]; % make matrix with two column vectors
             V = pinv(A)*b; % get pixel displacement
             % store results
-            u(x,y)=V(1);
-            v(x,y)=V(2);
+            
+            u(x,y) = V(1);
+            v(x,y)= V(2);
+            
         end
         y = 0;
     end
-   
     figure
     if isa(img_1_path, 'char')
         imshow(img_2);
@@ -78,17 +83,10 @@ function [u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path)
         k_length = floor((6 * sigma) + 1);
         G = fspecial('gaussian', [1 k_length], sigma);
         [~, Gd]=gaussianDer(im1 ,G, sigma);
-        Ix = conv2(im1, Gd, 'valid');
-
-        size(im1)
-        disp('Ix')
-        Iy = conv2(im1, Gd', 'valid');
-        size(im1)
-        size(Iy)
-        disp('Iy')
+        Ix = conv2(im1, Gd, 'same');
+        Iy = conv2(im1, Gd', 'same');
         It = imabsdiff(im2, im1);
     end
-
     function [I_x, I_y, I_t]=computeIntensityDerivs(im1, im2)
         % computes the intensity derivatives I(x+deltax, y+deltay,
         % t+deltat)
