@@ -13,10 +13,16 @@ function [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, window_siz
 
     % compute total number of pixels in patch
     num_pixels = window_size^2;
-    % compute image derivatives w.r.t. x, y and t
-    %[Ix, Iy, It]=computeIntensityDerivs(img_1, img_2);
-
-    [Ix, Iy, It]=computeWithGausDerivatives(img_1, img_2, 1);
+    % Compute Ix (x direction derivitive), Iy (y direction derivitive) and
+    % It
+    % For this function there are two options using IntensityDerivs or
+    % GaussianDerivs, IntensityDerivs are used because they give much
+    % better results. The other option is still available
+    [Ix, Iy, It] = computeIntensityDerivs(img_1, img_2);
+   
+    %Other option GausDerivatives in comments 
+    %[Ix, Iy, It]=computeWithGausDerivatives(img_1, img_2, 1);
+    % initialize matrices for the result of the displacements
     % Ignore corner points that are to close to image borders
     half_w_size = floor( (window_size - 1) / 2);
     indexes = find( r <= (size(Iy, 1) - half_w_size) & r > half_w_size & ...
@@ -60,6 +66,23 @@ function [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, window_siz
         Iy = conv2(im1, Gd', 'valid');
         It = imabsdiff(im2, im1);
     end
+    function [I_x, I_y, I_t]=computeIntensityDerivs(im1, im2)
+        % computes the intensity derivatives I(x+deltax, y+deltay,
+        % t+deltat)
+        % input parameters:
+        % image 1 and 2
+        % returns: the three derivatives
+        
+        % setup our derivative filters, we use backward filter
+        ft_x =  [-1 1; -1 1];
+        ft_y =  [-1 -1; 1 1];
+        ft_t =  [ 1  1; 1 1];
+        ctype = 'valid';
+        
+        I_x = conv2(im1, ft_x, ctype); 
+        I_y = conv2(im1, ft_y, ctype);
+        I_t = conv2(im1, ft_t, ctype) + conv2(im2, -ft_t, ctype);
+    end % computeIntensityDerivs
 
 end % LucasKanadeTrackingPoints
 
