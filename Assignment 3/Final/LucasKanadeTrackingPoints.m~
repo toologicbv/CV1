@@ -24,6 +24,7 @@ function [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, window_siz
     % then compute approximated displacement vector for corner point
     new_r = zeros(1, length(indexes));
     new_c = zeros(1, length(indexes));
+    u
     for i=1:length(indexes)
         % compute the patch offsets w.r.t the corner point
 
@@ -43,8 +44,8 @@ function [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, window_siz
         b =  -It_block;
         V = pinv(A) * b;
         % compute the new coordinates of the corner points
-        new_r(i) = round((r(i) + V(2)),0);
-        new_c(i) = round((c(i) + V(1)),0);
+        new_r(i) = r(i) + round(V(1), 0);
+        new_c(i) = c(i) + round(V(2), 0);
     end
 
     function [I_x, I_y, I_t]=computeIntensityDerivatives(im1, im2)

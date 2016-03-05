@@ -44,6 +44,8 @@ function [video]=createOpticalFlow(in_path, search_mask, out_path)
     v_frames(:,:,:,1) = double(frame.cdata) / 255;
     
     % start looping through files, starting with second image
+    w_off = floor( (w_size - 1) / 2); 
+    [X, Y] = meshgrid(w_off+1:w_size:size(Ix,2)-w_off, w_off+1:w_size:size(Ix,1)-w_off);
     for i=2:length(files)
         % concatenate input patch and filename
         inFilename = [in_path, files(i).name];     
@@ -53,13 +55,12 @@ function [video]=createOpticalFlow(in_path, search_mask, out_path)
         % compute the new coordinates of the points to track
         % the function returns the new coordinates (so not the
         % displacement vectors)
-        [X , Y, u,v] =LucasKanadeFinal(img_1,img_2, false);
-        [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, w_size);
+        [new_r, new_c, V]=LucasKanadeTrackingPoints(img_1, img_2, r, c, w_size);
         % plot image (don't visualize) and corner points, save to output
         % directory and get the frames for the video
         fig = figure('visible','off');
         imshow(i2); hold on;
-        quiver(X, Y, u, v, 'y')
+        quiver(X, Y, V(1), V(2), 'y')
         plot(new_c, new_r, 'ro');
         outFileName = [out_path, files(i).name];
         saveas( gcf, outFileName, 'jpg' );

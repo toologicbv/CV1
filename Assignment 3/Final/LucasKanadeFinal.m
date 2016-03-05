@@ -1,10 +1,11 @@
-function [u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path)
+function [X , Y, u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path, plot_results)
     % Function that calculate optical flow for two imput images 
     % detector
     % input parameters:
     % (1) img_1_path: path to image 1
     % (2) img_2_path: path to image 2
-    % (3) sigma: sigma of the gaussian to use for convolution
+    % (3) plot_results: boolean that needs to be true if you want to plot
+    % the result, otherwise no result will be shown
     
 
     % convert images to double values
@@ -69,15 +70,16 @@ function [u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path)
         end
         y = 0;
     end
-    figure
-    if isa(img_1_path, 'char')
-        imshow(img_2);
-    else
-        imshow(img_2_path);
-    end
-    hold on;
-    quiver(X, Y, u, v, 'y')    
-
+    if plot_results
+        figure
+        if isa(img_1_path, 'char')
+            imshow(img_2);
+        else
+            imshow(img_2_path);
+        end
+        hold on;
+        quiver(X, Y, u, v, 'y')    
+    end 
     function [Ix, Iy, It]= computeWithGausDerivatives(im1, im2, sigma)
        
         k_length = floor((6 * sigma) + 1);
