@@ -1,24 +1,25 @@
-function [video]=createOpticalFlow(in_path, search_mask, out_path)
+function createOpticalFlow(in_path, search_mask, out_path, sigma, w_size, threshold)
     % This function creates an optical flow video from a series of input
     % images.
-    % The function first determines the corner points in the first images
+    % The function first determines the corner points in the first image
     % and then tries to track these points over the several images.
     % input parameters:
     % (1) in_path: the absolute path to the input directory that contains
     % the images.
     % (2) search_mask: e.g. "*.jpeg"
-    % (3) out_path: the output path of the images. we save the individual
-    % images that contain the optical flow to a separate directory
-    % output parameters:
-    % video: video created by means of MATLAB function imvideo
+    % (3) out_path: for the video
+    % (4) sigma: scale parameter for convolution with Gaussian derivatives
+    % (value between 1.1 - 1.5)
+    % (5) w_size: window/patch size (we used 15)
+    % (6) threshold: used for non-maximal suppresion (we used 3.5)
+    %
+    % Computer Vision 1 / Assignment 3
+    % Maurits Bleeker / 10694439
+    % Jörg Sander / 10881530
     %
     % Example invocation:
-    % video=printFlow('S:/Workspace/CV_III/im_in/', '*.jpeg', 'S:/Workspace/CV_III/im_out/')
+    % createOpticalFlow('S:/Workspace/CV_III/person_toy/', '*.jpg', 'S:/Workspace/CV_III/video_out/', 1.1, 15, 3.5);
     
-    % initialize the parameters
-    sigma = 1.4;
-    w_size = 15;
-    threshold = 3.5;
     % concatenate input patch with search mask
     search_mask = [in_path, search_mask];
     
@@ -31,14 +32,15 @@ function [video]=createOpticalFlow(in_path, search_mask, out_path)
     % initialize variable that holds the image frames for the final video
     m_frames = zeros(size(img_1,1), size(img_1,2), 3, length(files));
     % get corner points
-    [ H, r, c] = HarrisCornerDetectorv2(inFilename, sigma, w_size, threshold, false);
+    [ ~, r, c] = HarrisCornerDetectorv2(inFilename, sigma, w_size, threshold, false);
     % plot image but don't visualize, plot corner points and save image to file
     fig = figure('visible','off');
     imshow(i1); hold on;
     plot(c, r, 'ro');
-    outFileName = [out_path, files(1).name];
-    % save the result
-    saveas( gcf, outFileName, 'jpg' );
+    % open video objects
+    outFileName = [out_path, 'opticalFlow.avi'];
+    vidObjects = VideoWriter(outFileName);
+    open(vidObjects);
     % capture the frames for the video
     frame = getframe(fig);
     v_frames(:,:,:,1) = double(frame.cdata) / 255;
@@ -53,16 +55,13 @@ function [video]=createOpticalFlow(in_path, search_mask, out_path)
         % compute the new coordinates of the points to track
         % the function returns the new coordinates (so not the
         % displacement vectors)
-        [X , Y, u,v] =LucasKanadeFinal(img_1,img_2, false);
         [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, w_size);
         % plot image (don't visualize) and corner points, save to output
         % directory and get the frames for the video
         fig = figure('visible','off');
         imshow(i2); hold on;
-        quiver(X, Y, u, v, 'y')
         plot(new_c, new_r, 'ro');
-        outFileName = [out_path, files(i).name];
-        saveas( gcf, outFileName, 'jpg' );
+        
         % get the frame for the video
         frame = getframe(fig);
         v_frames(:,:,:,i) = double(frame.cdata) / 255;
@@ -72,8 +71,11 @@ function [video]=createOpticalFlow(in_path, search_mask, out_path)
         c = new_c;
     end
 
-    video = immovie(v_frames);
+    % video = immovie(v_frames);
     % implay(video);
+    % save video to file
+    writeVideo(vidObjects, v_frames);
+    close(vidObjects);
     
     function [im_out]=convertIfNeccessary(im)
         % if image has color channels convert to grayscale only
