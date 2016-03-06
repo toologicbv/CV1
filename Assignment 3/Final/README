@@ -1,0 +1,27 @@
+Computer Visions 1 - Lab assignment 2
+=================================
+Maurits Bleeker - 10694439
+Jörg Sander - 108815
+
+
+For section 1:
+=============================
+HarrisCornerDetectorv2.m
+
+A demo function that returns the H matrix, the rows of the detected corner points r, and the columns of those points c there is 
+also a input parameter plot_yn. If plot_yn = true the function also plots three figures,  derivatives Ix and Iy, and the original image.
+
+For section 3:
+=============================
+LucasKanadeAlgorithm.m
+
+A demo function which runs [X , Y, u,v]. X and Y are the coordinates vectors of the velocity vectors u and v in the images. U and V
+are the velocity vecots that describes the horizontal and vertical motion of every window in the image. 
+
+This function has a input parameter plot_results. If plot_results= true the first input images will be plotted with the velocity vectors calculated by yhe algoritme
+
+For section 4:
+============================
+createOpticalFlow.m
+
+This function calculates the optical flow for a sample image sequences. With this optical flow we can track corner points in a sample image sequences.
