@@ -32,9 +32,9 @@ function [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, window_siz
         c_min = c(i) - half_w_size;
         c_max = c(i) + half_w_size;
         % construct the building blocks of A matrix and b
-        Ix_block = Ix(r_min:r_max, c_min:c_max);
-        Iy_block = Iy(r_min:r_max, c_min:c_max);
-        It_block = It(r_min:r_max, c_min:c_max);
+        Ix_block = Ix(round(r_min, 0):round(r_max,0), round(c_min,0):round(c_max,0));
+        Iy_block = Iy(round(r_min, 0):round(r_max,0), round(c_min,0):round(c_max,0));
+        It_block = It(round(r_min, 0):round(r_max,0), round(c_min,0):round(c_max,0));
         Ix_block = Ix_block(:);
         Iy_block = Iy_block(:);
         It_block = It_block(:);
@@ -43,8 +43,8 @@ function [new_r, new_c]=LucasKanadeTrackingPoints(img_1, img_2, r, c, window_siz
         b =  -It_block;
         V = pinv(A) * b;
         % compute the new coordinates of the corner points
-        new_r(i) = round((r(i) + V(2)),0);
-        new_c(i) = round((c(i) + V(1)),0);
+        new_r(i) = r(i) + V(2);
+        new_c(i) = c(i) + V(1);
     end
 
     function [I_x, I_y, I_t]=computeIntensityDerivatives(im1, im2)

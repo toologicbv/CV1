@@ -89,6 +89,7 @@ function [X , Y, u,v]=LucasKanadeAlgorithm( img_1_path, img_2_path, plot_results
         Iy = conv2(im1, Gd', 'same');
         It = imabsdiff(im2, im1);
     end
+
     function [I_x, I_y, I_t]=computeIntensityDerivs(im1, im2)
         % computes the intensity derivatives I(x+deltax, y+deltay,
         % t+deltat)
