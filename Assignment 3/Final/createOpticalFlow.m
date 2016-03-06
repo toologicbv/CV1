@@ -30,7 +30,7 @@ function createOpticalFlow(in_path, search_mask, out_path, sigma, w_size, thresh
     i1 = im2double(imread(inFilename));
     img_1 = convertIfNeccessary(i1);
     % initialize variable that holds the image frames for the final video
-    m_frames = zeros(size(img_1,1), size(img_1,2), 3, length(files));
+    v_frames = zeros(size(img_1,1), size(img_1,2), 3, length(files));
     % get corner points
     [ ~, r, c] = HarrisCornerDetectorv2(inFilename, sigma, w_size, threshold, false);
     % plot image but don't visualize, plot corner points and save image to file
