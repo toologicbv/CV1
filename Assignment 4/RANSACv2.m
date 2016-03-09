@@ -88,10 +88,10 @@ if plot_result && (size(best_matches,2) > 0.8 * size(T, 2))
     title('Original image 2');
     subplot(2,2,3);
     imagesc(I1_TC);
-    title('Custom aff. trans. I1');
+    title('Custom affine trans. of image 1');
     subplot(2,2,4);
     imagesc(I1_TM);
-    title('MATLAB aff. trans. I1');
+    title('MATLAB affine trans. of image 1');
 
 end
 

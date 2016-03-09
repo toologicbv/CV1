@@ -61,7 +61,7 @@ function plotMatchingPoints(N, f1, f2, matches, img_path1, img_path2)
     f2(1,matches(2,t_indexes)) = f2(1,matches(2,t_indexes)) + size(n_im1,2) ;
     vl_plotframe(f2(:,matches(2,t_indexes))) ;
     axis image off ;
-    f_title = 'sift matches between image 1 and 2 ';
+    f_title = 'Keypoint matchings using SIFT';
     title(f_title);
 
 end % plotMatchingPoints
