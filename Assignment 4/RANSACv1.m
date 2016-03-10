@@ -32,10 +32,6 @@ end
 [f2, d2] = vl_sift(I2);
 % find matches between the descriptors
 [T, ~] = vl_ubcmatch(d1, d2);
-if size(T,2) < N
-    N = size(T,2);
-    sprintf('Setting number of samples to number of matches...')
-end
 
 % set max inlier count to zero and initialize RANSAC variables
 max_count = 0;
