@@ -95,21 +95,24 @@ if plot_result && (size(best_matches,2) > 0.8 * size(T, 2))
 
 end
 
-    function [A,b]=construct_A(p2, p1)
+    function [A,b]=construct_A(p1, p2)
         % function constructs the A matrix and the vector b based on the
         % sampled points
         % p1 contains the keypoints of the source image
         % p2 contains the keypoints of the target image
         % construct least square "ingredients", matrix A and vector b
         % b is the transformed feature point in image 2 (x,y) coordinates
-        b = p2(:);
-        % construct the first two parts of the A matrix (the third is 2D
-        % identity matrix)
-        u1 = [ p1(:,1)' 1; 0 0 0 ];
+        b = p1(:);
+        % construct the A matrix
+        % x1 y1 1 0   0   0; 
+        % 0  0  0 x1  y1  1;
+        % x2 y2 1 0   0   0;
+        % 0  0  0 x2  y2  1; etc
+        u1 = [ p2(:,1)' 1; 0 0 0 ];
         u1 = cat(2, u1, flipud(u1));
-        u2 = [ p1(:,2)' 1; 0 0 0 ];
+        u2 = [ p2(:,2)' 1; 0 0 0 ];
         u2 = cat(2, u2, flipud(u2));
-        u3 = [ p1(:,3)' 1; 0 0 0 ];
+        u3 = [ p2(:,3)' 1; 0 0 0 ];
         u3 = cat(2, u3, flipud(u3));
         % concatenate three parts along the column dimension
         A = cat(1, u1, u2, u3);

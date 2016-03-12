@@ -31,7 +31,7 @@ function plotMatchingPoints(N, f1, f2, matches, img_path1, img_path2)
     % if two images have different sizes, determine "one fits all size"
     % and construct new images
     if (size(I1,1) ~= size(I2,1) || size(I1,2) ~= size(I2,2))
-        [x_max, y_max]=detMaxImageSize(I1, i2);
+        [x_max, y_max]=detMaxImageSize(I1, I2);
         n_im1 = uint8(zeros(x_max, y_max, size(I1,3))); 
         n_im2 = uint8(zeros(x_max, y_max, size(I1,3)));
         % transfer both images to the new matrices respectively.

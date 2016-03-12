@@ -16,7 +16,7 @@ implementation of Andrea Vidaldi
 Plots a random subset of the matching points between image 1 and 2 on the concatenated image and connects
 them with lines
 
-(3) RANSACv2.m
+(3) RANSACv3.m
 
 A demo function that uses RANSAC algorithm to find best transformation parameters. Also returns the best set
 of matching points belonging to the t-parameters.
@@ -25,7 +25,7 @@ Helper functions:
 -------------------------
 affine_trans.m
 nearestNeighbor.m
-
+detMaxImageSize.m
 
 For section 2:
 =============================
