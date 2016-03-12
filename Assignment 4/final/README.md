@@ -23,9 +23,9 @@ of matching points belonging to the t-parameters.
 
 Helper functions:
 -------------------------
-(4) affine_trans.m
-(5) nearestNeighbor.m
-(6) detMaxImageSize.m
+affine_trans.m
+nearestNeighbor.m
+detMaxImageSize.m
 
 For section 2:
 =============================
