@@ -2,7 +2,7 @@ function [ output_args ] = image_stitching( img_path1, img_path2 )
     % Implementation of a image stichting alogirtme 
     %
     % Computervision I / Assignment 4
-    % Jörg Sander / 10881530
+    % JÃ¶rg Sander / 10881530
     % Maurits Bleeker / 10694439
     % 
     % **** NOTE *****
@@ -25,7 +25,7 @@ function [ output_args ] = image_stitching( img_path1, img_path2 )
         I2 = im2single(I2_255);
     end
     
-    % size in the y direction of the original images 
+    % size in the x and y direction of the original images 
     x_org = size(I2, 2)
     y_org = size(I2, 1);
     
@@ -47,12 +47,12 @@ function [ output_args ] = image_stitching( img_path1, img_path2 )
     x_transformed = size(I2, 2);
     
      
-    % diff_y is the extra padding that is added by rotating the images
+    % diff_y is the extra padding that is added by rotating the images in the y direction
     diff_y = ((y_transformed - y_org) / 2);
     y = y - diff_y;
     
-    % for the x lenght of the new images, add the two input and subtract
-    % the momevent in the x direction and the new padding of images 2
+    % for the x lenght of the new images, add the two input images and subtract
+    % the momevent in the x direction and subtrackt the new padding of images 2
     
     x_length = size(I1,1) + size(I2,1) - x - (x_transformed - x_org);
     y_length = max(round(y,0) + size(I1,2), size(I1,2));
