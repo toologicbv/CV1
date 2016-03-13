@@ -29,3 +29,13 @@ detMaxImageSize.m
 
 For section 2:
 =============================
+
+
+(1) image_stitching.m
+
+A demo functions that stitches two input images togehter and create a produce a segmented images from the two input images. 
+
+
+(2) RANSACv1.m
+
+Original RANSAC we developed, slightly different function then v3 but easier to use for images stitiching. 
