@@ -8,6 +8,7 @@ function [ k_clusters ] = k_means_clustering( features, k )
     % 
     % Input parameters:
     % (1) features: images discriptors where we want to train our knn on
-    k_clusters = kmeans(double(features),k)
+    [C, A] = VL_KMEANS(double(features)', k) 
+    %k_clusters = kmeans(double(features),k)
 end
 
