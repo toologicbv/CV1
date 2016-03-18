@@ -14,5 +14,7 @@ function [ hist ] = quantizeFeatures( features, clusters)
         distance = pdist2(clusters' , double(features(i,:)));
         index_min_distance = find(distance == min(distance));
         hist(index_min_distance) = hist(index_min_distance) + 1;
+        % normalise histogram vector bij sum of features
+        hist = hist ./ size(features,1);
     end 
 end
