@@ -1,4 +1,4 @@
-function [ k_clusters ] = k_means_clustering( features, k )
+function [ C ] = kMeansClustering( features, k )
     % Function that returns k clusters in the dataset 
     %
     % Computervision I / Assignment 4
@@ -8,7 +8,7 @@ function [ k_clusters ] = k_means_clustering( features, k )
     % 
     % Input parameters:
     % (1) features: images discriptors where we want to train our knn on
-    [C, A] = VL_KMEANS(double(features)', k) 
+    [C, A] = vl_kmeans(double(features)', k) 
     %k_clusters = kmeans(double(features),k)
 end
 
