@@ -10,11 +10,23 @@ function featureExtractionv1(root_dir, mode, sampling, cspaces, img_cat)
 % colorSIFT: array of colorspaces, can be one or more or empty (only
 %            Intensity then). Possible values:
 %            RGB, rgb , opp
-%
+% img_cat: one category e.g. 'cars' or 'all' for all categories
 %
 % Output parameters:
 % ===================
-% returns ONE matrix N x 128 (N is number of features)
+% saves the following matrices to the current working directory
+% (1) one matrix for all features of all images.
+%     dimension N x 128 (N = number of features)
+% (2) per category a matrix with all features per image. The first column
+% is equal to the image number (e.g. img021.jpg => img ID = 21).
+% NOTE: ths matrix is stored in the category specific directory, e.g. if
+% mode = 'train' and processing category 'cars' then the matrix is stored
+% in root_dir/cars_train/ directory
+%
+% sample invocation
+% 
+% featureExtractionv1('S:/workspace/cv_final/ImageData', 'train', 'point', '', 'cars');
+
 
     % global variable, binSize for dense sampling
     binSize = 8;
@@ -43,7 +55,7 @@ function featureExtractionv1(root_dir, mode, sampling, cspaces, img_cat)
         % loop through images
         for i=1:length(ifiles)
             % extract image ID
-            imgID = str2double(ifiles(i).name(strfind(ifiles(i).name, 'img'), end-4));
+            imgID = str2double(ifiles(i).name(4:end-4));
             imgFile = strcat(i_dir, ifiles(i).name); 
             Img = imread(imgFile);
             % if we also need to compute colorSIFT descriptors we need to
@@ -58,9 +70,9 @@ function featureExtractionv1(root_dir, mode, sampling, cspaces, img_cat)
             end
             % finally make a matrix per image
             % first column contains image number in that category
+            sift_d = double(sift_d);
             t = cat(2, repmat(imgID, size(sift_d, 1), 1), sift_d);
             SIFT_OUT_CAT = cat(1, SIFT_OUT_CAT, t);
-                  
         end  % loop through images
         % save results for this category
         if size(SIFT_OUT_CAT,1) > 1
