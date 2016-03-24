@@ -1,4 +1,4 @@
-function [SIFT_OUT,IMAGES_INDEX,amount_of_images] = featureExtractionv1(root_dir, mode, sampling, cspaces, img_cat, save_data, images_per_class)
+function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, images_per_class)
 % function that extracts SIFT features from images
 %
 % Input parameters:
@@ -32,15 +32,7 @@ function [SIFT_OUT,IMAGES_INDEX,amount_of_images] = featureExtractionv1(root_dir
     binSize = 8;
     % define the image categories
     img_cats = {'airplanes', 'cars', 'faces', 'motorbikes'};
-    % three potential colorspaces: RGB, rgb and opponent
-
-    if strcmp(img_cat, ' ') || strcmp(img_cat,'') || strcmp(img_cat, 'all')
-        num_cats = length(img_cats);
-    else
-        num_cats = 1;
-        img_cats = { img_cat };
-    end
-
+    num_cats = length(img_cats);
     
     % NOTE!!!!!!! THIS IS 500, 50 is for DEVELOPMENT
     max_amount_img_per_class = 50;
@@ -52,43 +44,28 @@ function [SIFT_OUT,IMAGES_INDEX,amount_of_images] = featureExtractionv1(root_dir
     if images_per_class > max_amount_img_per_class 
         images_per_class = max_amount_img_per_class;
     end 
-    
+
 
     % prepare the output matrix for the SIFT descriptors
     SIFT_OUT = [];
-    IMAGES_INDEX = [];
-    % counter how many images we have 
-    amount_of_images = 0;
-    index = 1;
-    img_names = {};
     for cats=1:num_cats  % loop through all image categories
         % prepare the input directory based on the "mode" and the "category"
         i_dir = strcat(root_dir, '/', img_cats{cats}, '_', mode, '/');
         % construct search mask
         search_mask = strcat(i_dir, '*.jpg');
         ifiles = dir(search_mask);
-        % initialize matrix for this category
-        SIFT_OUT_CAT = [];
-        IMG_INDEX = [];
         
-        amount_of_images = amount_of_images + length(ifiles);
         random_img_indexes = randsample(linspace(1,images_per_class,images_per_class),images_per_class);
-        
         % loop through images
-        for i=1:length(ifiles)
+        for i= random_img_indexes
             % extract image ID
             imgID = str2double(ifiles(i).name(4:end-4));
             imgFile = strcat(i_dir, ifiles(i).name); 
             Img = imread(imgFile);
-            
             % if we also need to compute colorSIFT descriptors we need to
             % transform the image       
             sift_d = compute_SIFT_desc(Img, sampling);
             
-            index_vector = zeros(size(sift_d, 1), 1);
-            index_vector(:) = index;
-            index =  index + 1;
-            IMAGES_INDEX = cat(1, IMAGES_INDEX,index_vector);
             SIFT_OUT = cat(1, SIFT_OUT, sift_d);
             if ~ isempty(cspaces)
                 sift_c_d = processColorChannels(Img, cspaces, sampling);
@@ -99,20 +76,11 @@ function [SIFT_OUT,IMAGES_INDEX,amount_of_images] = featureExtractionv1(root_dir
             % finally make a matrix per image
             % first column contains image number in that category
             sift_d = double(sift_d);
-            t = cat(2, repmat(imgID, size(sift_d, 1), 1), sift_d);
-            SIFT_OUT_CAT = cat(1, SIFT_OUT_CAT, t);
         end  % loop through images
-        % save results for this category
-        if size(SIFT_OUT_CAT,1) > 1 && save_data
-            save(strcat(i_dir, img_cats{cats}, '_', mode, '.mat'), 'SIFT_OUT_CAT');
-        end
+        
     end % loop through all image categories
 
-    % save result to file
-    if size(SIFT_OUT,1) > 1 && save_data
-        % save(strcat(img_cats{cats}, '_', mode, '.mat'), 'SIFT_OUT');
-        save(strcat('features_', mode, '.mat'), 'SIFT_OUT');
-    end
+   
 
 % ======================== END MAIN FUNCTION ===========================
 
