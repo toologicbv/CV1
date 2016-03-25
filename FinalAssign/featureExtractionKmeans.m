@@ -1,4 +1,4 @@
-function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, images_per_class)
+function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, images_per_class, amount_img_per_class)
 % function that extracts SIFT features from images
 %
 % Input parameters:
@@ -11,6 +11,11 @@ function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, image
 %            Intensity then). Possible values:
 %            RGB, rgb , opp
 % img_cat: one category e.g. 'cars' or 'all' for all categories
+% images_per_class: the amount of images you want to sample random for
+% training
+% amount_img_per_class: how many images does a class contains in total, in
+% general is this 500 for training and 50 for testing, but while developing
+% to could vary
 %
 % Output parameters:
 % ===================
@@ -34,15 +39,17 @@ function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, image
     img_cats = {'airplanes', 'cars', 'faces', 'motorbikes'};
     num_cats = length(img_cats);
     
-    % NOTE!!!!!!! THIS IS 500, 50 is for DEVELOPMENT
-    max_amount_img_per_class = 50;
+   
+    max_amount_img_per_class = 500;
+    min_amount_img_per_class = 50;
     % three potential colorspaces: RGB, rgb and opponent
     
     % always get the images for training the kMeans for the training data
-    
     mode = 'train';
     if images_per_class > max_amount_img_per_class 
-        images_per_class = max_amount_img_per_class;
+        images_per_class = max_amount_img_per_class
+    elseif images_per_class < min_amount_img_per_class
+        images_per_class = min_amount_img_per_class
     end 
 
 
@@ -55,7 +62,9 @@ function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, image
         search_mask = strcat(i_dir, '*.jpg');
         ifiles = dir(search_mask);
         
-        random_img_indexes = randsample(linspace(1,images_per_class,images_per_class),images_per_class);
+        % random sample n images_per_class from the total amount_img_per_class
+        random_img_indexes = randsample(linspace(1,amount_img_per_class,amount_img_per_class),images_per_class);
+        
         % loop through images
         for i= random_img_indexes
             % extract image ID
