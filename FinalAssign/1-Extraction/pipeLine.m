@@ -24,9 +24,9 @@ function pipeLine(img_used_for_training, mode, cspace, sampling, k)
 
     root_dir_maurits = '/Users/Maurits/Desktop/ImageData';
     root_dir_jorg = 'S:/workspace/cv_final/ImageData';
-    root_dir = root_dir_jorg;
+    root_dir = root_dir_maurits;
     % for testing puposes
-    notJorg = false;
+    notJorg = true;
     % don't want to compute the codebook each time...takes too long on my
     % machine
     codebook = true;
@@ -129,7 +129,7 @@ function pipeLine(img_used_for_training, mode, cspace, sampling, k)
             labelsAirplanes = zeros(t_num_of_img, 1); 
             labelsAirplanes(1:amount_of_images_planes) = 1;
             labelsAirplanes(amount_of_images_planes+1:end) = -1;
-            save([sampling(1),'_', cspace, '_training_data_planes', num2str(k), '.mat'], 'training_data_planes');
+            save([sampling(1),'_', cspace, '_',mode,'_data_planes', num2str(k), '.mat'], 'training_data_planes');
             save([sampling(1), '_', cspace,'_labelsAirplanes', num2str(k), '.mat'], 'labelsAirplanes');
         elseif  strcmp(img_cats{c}, 'cars')
             % cars
@@ -140,7 +140,7 @@ function pipeLine(img_used_for_training, mode, cspace, sampling, k)
             labelsCars = zeros(t_num_of_img, 1); 
             labelsCars(1:amount_of_images_cars) = 1;
             labelsCars(amount_of_images_cars+1:end) = -1;
-            save([sampling(1), '_', cspace, '_training_data_cars', num2str(k), '.mat'], 'training_data_cars');
+            save([sampling(1), '_', cspace, '_',mode,'_data_cars', num2str(k), '.mat'], 'training_data_cars');
             save([sampling(1), '_', cspace, '_labelsCars', num2str(k), '.mat'], 'labelsCars');
         elseif strcmp(img_cats{c}, 'faces')
             % faces
@@ -151,7 +151,7 @@ function pipeLine(img_used_for_training, mode, cspace, sampling, k)
             labelsFaces = zeros(t_num_of_img, 1); 
             labelsFaces(1:amount_of_images_faces) = 1;
             labelsFaces(amount_of_images_faces+1:end) = -1;
-            save([sampling(1), '_', cspace, '_training_data_faces', num2str(k), '.mat'], 'training_data_faces');
+            save([sampling(1), '_', cspace, '_',mode,'_data_faces', num2str(k), '.mat'], 'training_data_faces');
             save([sampling(1), '_', cspace, '_labelsFaces', num2str(k), '.mat'], 'labelsFaces');
         elseif strcmp(img_cats{c}, 'motorbikes')
             % motorbikes
@@ -162,7 +162,7 @@ function pipeLine(img_used_for_training, mode, cspace, sampling, k)
             labelsBikes = zeros(t_num_of_img, 1); 
             labelsBikes(1:amount_of_images_bikes) = 1;
             labelsBikes(amount_of_images_bikes+1:end) = -1;
-            save([sampling(1), '_', cspace, '_training_data_bikes', num2str(k), '.mat'], 'training_data_bikes');
+            save([sampling(1), '_', cspace, '_',mode,'_data_bikes', num2str(k), '.mat'], 'training_data_bikes');
             save([sampling(1), '_', cspace, '_labelsBikes', num2str(k), '.mat'], 'labelsBikes');
         end
     end
