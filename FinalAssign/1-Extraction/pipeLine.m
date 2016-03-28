@@ -4,7 +4,7 @@ function pipeLine(img_used_for_training, mode, sampling, k)
     % and motorbikes:
     % (1) build the visual codebook (by means of k-means)
     % (2) extract the features per image and quantize the features to the
-    % visual words of the codebook (128 histogram vector)
+    % visual words of the codebook (histogram vector)
     % (3) build the annotation vector for each category, only used for training 
     %
     %
@@ -21,11 +21,12 @@ function pipeLine(img_used_for_training, mode, sampling, k)
 
     % root dirs for development
     
-    root_dir_maurits = '/Users/Maurits/Documents/UvA AI/Computer Vision/Final Project/Caltech4/ImageData/test/';
+    root_dir_maurits = '/Users/Maurits/Documents/UvA AI/Computer Vision/Final Project 3/Caltech4/ImageData';
     root_dir_jorg = 'S:/workspace/cv_final/ImageData';
-    root_dir = root_dir_jorg;
+    root_dir = root_dir_maurits;
     % for testing puposes
-    notJorg = false;
+    notJorg = true;
+    
     % don't want to compute the codebook each time...takes too long on my
     % machine
     codebook = true;
@@ -54,11 +55,11 @@ function pipeLine(img_used_for_training, mode, sampling, k)
     if strcmp(mode, 'train') && codebook
         % for training we need to extract features by sampling images and
         % then build the codebook by means of k-means
-        X = featureExtractionKmeans(root_dir, mode, sampling, cspaces, img_used_for_training);
+        X = featureExtractionKmeans(root_dir, sampling, cspaces, img_used_for_training);
         % train k-means
         [C, ~ ] = kMeansClustering( X, k );
         % save the codebook
-        save(codebookFilename, 'C');
+        save('kmeansClusters.mat', 'C');
     else
         % test mode, load the codebook from file
         C = loadMatrixFromFile(codebookFilename);

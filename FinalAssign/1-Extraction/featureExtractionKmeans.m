@@ -1,4 +1,4 @@
-function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, images_per_class, amount_img_per_class)
+function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, images_per_class)
 % function that extracts SIFT features from images
 %
 % Input parameters:
@@ -61,10 +61,9 @@ function [SIFT_OUT] = featureExtractionKmeans(root_dir, sampling, cspaces, image
         % construct search mask
         search_mask = strcat(i_dir, '*.jpg');
         ifiles = dir(search_mask);
-        
+
         % random sample n images_per_class from the total amount_img_per_class
-        random_img_indexes = randsample(linspace(1,amount_img_per_class,amount_img_per_class),images_per_class);
-        
+        random_img_indexes = randsample(linspace(1,length(ifiles),length(ifiles)),images_per_class);
         % loop through images
         for i= random_img_indexes
             % extract image ID
