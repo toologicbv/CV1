@@ -1,10 +1,10 @@
-function pipeLine(img_used_for_training, mode, sampling, k)
+function pipeLine(img_used_for_training, mode, cspace, sampling, k)
     % The following steps are perfomed by this function in order to build
     % four classifiers for the object recognition of cars, faces, airplanes
     % and motorbikes:
     % (1) build the visual codebook (by means of k-means)
     % (2) extract the features per image and quantize the features to the
-    % visual words of the codebook (histogram vector)
+    % visual words of the codebook (128 histogram vector)
     % (3) build the annotation vector for each category, only used for training 
     %
     %
@@ -21,12 +21,12 @@ function pipeLine(img_used_for_training, mode, sampling, k)
 
     % root dirs for development
     
+
     root_dir_maurits = '/Users/Maurits/Desktop/ImageData';
     root_dir_jorg = 'S:/workspace/cv_final/ImageData';
-    root_dir = root_dir_maurits;
+    root_dir = root_dir_jorg;
     % for testing puposes
-    notJorg = true;
-    
+    notJorg = false;
     % don't want to compute the codebook each time...takes too long on my
     % machine
     codebook = true;
@@ -35,17 +35,14 @@ function pipeLine(img_used_for_training, mode, sampling, k)
     % choice between point and dense sampling
     % sampling =  'point';
     img_cats = {'airplanes', 'cars', 'faces', 'motorbikes'};
-    % img_cats = {'airplanes', 'faces', 'cars'};
-    % different colormodels used for SIFT feature extraction
-    % if empty only grayscale is used
-    cspaces = '';
+
     % indicates whether the featureExtractionv2 function will store/save
     % the intermediate results to a file
     save_data = true;
     % number of k-means clusters
     % k = 200;
     % filename for k-means clusters...the codebook
-    codebookFilename = [sampling(1), '_kmeansClusters', num2str(k), '.mat'];
+    codebookFilename = [sampling(1), '_', cspace, '_kmeansClusters', num2str(k), '.mat'];
     
     % In order to build the k-means model we extract from each image
     % category a certain number of images (by sampling).
@@ -55,11 +52,11 @@ function pipeLine(img_used_for_training, mode, sampling, k)
     if strcmp(mode, 'train') && codebook
         % for training we need to extract features by sampling images and
         % then build the codebook by means of k-means
-        X = featureExtractionKmeans(root_dir, sampling, cspaces, img_used_for_training);
+        X = featureExtractionKmeans(root_dir, sampling, cspace, img_used_for_training);
         % train k-means
         [C, ~ ] = kMeansClustering( X, k );
         % save the codebook
-        save('kmeansClusters.mat', 'C');
+        save(codebookFilename, 'C');
     else
         % test mode, load the codebook from file
         C = loadMatrixFromFile(codebookFilename);
@@ -77,28 +74,28 @@ function pipeLine(img_used_for_training, mode, sampling, k)
         
         if strcmp(img_cats{c}, 'airplanes')
             [SIFT_OUT_PLANES,IMAGES_INDEX_PLANES] = ...
-                featureExtractionv2(root_dir, mode, sampling, cspaces, img_cats{c}, save_data);
+                featureExtractionv2(root_dir, mode, sampling, cspace, img_cats{c});
                 amount_of_images_planes = length(unique(IMAGES_INDEX_PLANES(:,1)));
                 t_num_of_img = t_num_of_img + amount_of_images_planes;
                 [ hist_matrix_planes ] = ...
                     quantizeFeatures (SIFT_OUT_PLANES,IMAGES_INDEX_PLANES,amount_of_images_planes, C);
         elseif  strcmp(img_cats{c}, 'cars')
             [SIFT_OUT_CARS,IMAGES_INDEX_CARS] = ...
-                featureExtractionv2(root_dir, mode, sampling, cspaces, img_cats{c}, save_data);
+                featureExtractionv2(root_dir, mode, sampling, cspace, img_cats{c});
                 amount_of_images_cars = length(unique(IMAGES_INDEX_CARS(:,1)));
                 t_num_of_img = t_num_of_img + amount_of_images_cars;
                 [ hist_matrix_cars ] = ...
                     quantizeFeatures (SIFT_OUT_CARS,IMAGES_INDEX_CARS,amount_of_images_cars, C);
         elseif strcmp(img_cats{c}, 'faces')
             [SIFT_OUT_FACES,IMAGES_INDEX_FACES] =...
-                featureExtractionv2(root_dir, mode, sampling, cspaces, img_cats{c}, save_data);
+                featureExtractionv2(root_dir, mode, sampling, cspace, img_cats{c});
                 amount_of_images_faces = length(unique(IMAGES_INDEX_FACES(:,1)));
                 t_num_of_img = t_num_of_img + amount_of_images_faces;
                 [ hist_matrix_faces ] = ...
                     quantizeFeatures (SIFT_OUT_FACES,IMAGES_INDEX_FACES,amount_of_images_faces, C);
         elseif strcmp(img_cats{c}, 'motorbikes')
             [SIFT_OUT_BIKES,IMAGES_INDEX_BIKES] = ...
-                featureExtractionv2(root_dir, mode, sampling, cspaces, img_cats{c}, save_data);
+                featureExtractionv2(root_dir, mode, sampling, cspace, img_cats{c});
             	amount_of_images_bikes = length(unique(IMAGES_INDEX_BIKES(:,1)));
                 t_num_of_img = t_num_of_img + amount_of_images_bikes;
                 [ hist_matrix_bikes ] = ...
@@ -132,8 +129,8 @@ function pipeLine(img_used_for_training, mode, sampling, k)
             labelsAirplanes = zeros(t_num_of_img, 1); 
             labelsAirplanes(1:amount_of_images_planes) = 1;
             labelsAirplanes(amount_of_images_planes+1:end) = -1;
-            save([sampling(1), '_training_data_planes', num2str(k), '.mat'], 'training_data_planes');
-            
+            save([sampling(1),'_', cspace, '_training_data_planes', num2str(k), '.mat'], 'training_data_planes');
+            save([sampling(1), '_', cspace,'_labelsAirplanes', num2str(k), '.mat'], 'labelsAirplanes');
         elseif  strcmp(img_cats{c}, 'cars')
             % cars
             training_data_cars = cat(1,hist_matrix_cars,...
@@ -143,7 +140,8 @@ function pipeLine(img_used_for_training, mode, sampling, k)
             labelsCars = zeros(t_num_of_img, 1); 
             labelsCars(1:amount_of_images_cars) = 1;
             labelsCars(amount_of_images_cars+1:end) = -1;
-            save([sampling(1), '_training_data_cars', num2str(k), '.mat'], 'training_data_cars');
+            save([sampling(1), '_', cspace, '_training_data_cars', num2str(k), '.mat'], 'training_data_cars');
+            save([sampling(1), '_', cspace, '_labelsCars', num2str(k), '.mat'], 'labelsCars');
         elseif strcmp(img_cats{c}, 'faces')
             % faces
             training_data_faces = cat(1,hist_matrix_faces,...
@@ -153,7 +151,8 @@ function pipeLine(img_used_for_training, mode, sampling, k)
             labelsFaces = zeros(t_num_of_img, 1); 
             labelsFaces(1:amount_of_images_faces) = 1;
             labelsFaces(amount_of_images_faces+1:end) = -1;
-            save([sampling(1), '_training_data_faces', num2str(k), '.mat'], 'training_data_faces');
+            save([sampling(1), '_', cspace, '_training_data_faces', num2str(k), '.mat'], 'training_data_faces');
+            save([sampling(1), '_', cspace, '_labelsFaces', num2str(k), '.mat'], 'labelsFaces');
         elseif strcmp(img_cats{c}, 'motorbikes')
             % motorbikes
             training_data_bikes = cat(1,hist_matrix_bikes,...
@@ -163,7 +162,8 @@ function pipeLine(img_used_for_training, mode, sampling, k)
             labelsBikes = zeros(t_num_of_img, 1); 
             labelsBikes(1:amount_of_images_bikes) = 1;
             labelsBikes(amount_of_images_bikes+1:end) = -1;
-            save([sampling(1), '_training_data_bikes', num2str(k), '.mat'], 'training_data_bikes');
+            save([sampling(1), '_', cspace, '_training_data_bikes', num2str(k), '.mat'], 'training_data_bikes');
+            save([sampling(1), '_', cspace, '_labelsBikes', num2str(k), '.mat'], 'labelsBikes');
         end
     end
     % Train the four classifies with the libsvm function

@@ -1,6 +1,6 @@
 function sift_d=compute_SIFT_desc(I1, sample_mode)
-    % binSize for dense sampling
-    binSize = 10;
+    % step and binSize for dense sampling
+    binSize = 20;
     stepSize = 20;
     % if necessary convert ot grayscale
     if size(I1,3) > 1
@@ -8,6 +8,7 @@ function sift_d=compute_SIFT_desc(I1, sample_mode)
     else
         I1 = single(I1);
     end
+
     if strcmp(sample_mode, 'point')
         % sparse/point sampling
         [~, sift_d] = vl_sift(I1);
