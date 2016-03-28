@@ -1,4 +1,4 @@
-function [labelsFaces, labelsCars]=pipeLine(img_used_for_training, mode)
+function pipeLine(img_used_for_training, mode, sampling, k)
     % The following steps are perfomed by this function in order to build
     % four classifiers for the object recognition of cars, faces, airplanes
     % and motorbikes:
@@ -28,13 +28,13 @@ function [labelsFaces, labelsCars]=pipeLine(img_used_for_training, mode)
     notJorg = false;
     % don't want to compute the codebook each time...takes too long on my
     % machine
-    codebook = false;
+    codebook = true;
     
     % parameters for the models, this should change depending on what you want to test  
     % choice between point and dense sampling
-    sampling =  'point';
+    % sampling =  'point';
     img_cats = {'airplanes', 'cars', 'faces', 'motorbikes'};
-    img_cats = {'airplanes', 'faces', 'cars'};
+    % img_cats = {'airplanes', 'faces', 'cars'};
     % different colormodels used for SIFT feature extraction
     % if empty only grayscale is used
     cspaces = '';
@@ -42,9 +42,9 @@ function [labelsFaces, labelsCars]=pipeLine(img_used_for_training, mode)
     % the intermediate results to a file
     save_data = false;
     % number of k-means clusters
-    k = 200;
+    % k = 200;
     % filename for k-means clusters...the codebook
-    codebookFilename = 'kmeansClusters.mat';
+    codebookFilename = [sampling(1), '_kmeansClusters', num2str(k), '.mat'];
     
     % In order to build the k-means model we extract from each image
     % category a certain number of images (by sampling).
@@ -131,6 +131,7 @@ function [labelsFaces, labelsCars]=pipeLine(img_used_for_training, mode)
             labelsAirplanes = zeros(t_num_of_img, 1); 
             labelsAirplanes(1:amount_of_images_planes) = 1;
             labelsAirplanes(amount_of_images_planes+1:end) = -1;
+            save([sampling(1), '_training_data_planes', num2str(k), '.mat'], 'training_data_planes');
             
         elseif  strcmp(img_cats{c}, 'cars')
             % cars
@@ -141,6 +142,7 @@ function [labelsFaces, labelsCars]=pipeLine(img_used_for_training, mode)
             labelsCars = zeros(t_num_of_img, 1); 
             labelsCars(1:amount_of_images_cars) = 1;
             labelsCars(amount_of_images_cars+1:end) = -1;
+            save([sampling(1), '_training_data_cars', num2str(k), '.mat'], 'training_data_cars');
         elseif strcmp(img_cats{c}, 'faces')
             % faces
             training_data_faces = cat(1,hist_matrix_faces,...
@@ -150,6 +152,7 @@ function [labelsFaces, labelsCars]=pipeLine(img_used_for_training, mode)
             labelsFaces = zeros(t_num_of_img, 1); 
             labelsFaces(1:amount_of_images_faces) = 1;
             labelsFaces(amount_of_images_faces+1:end) = -1;
+            save([sampling(1), '_training_data_faces', num2str(k), '.mat'], 'training_data_faces');
         elseif strcmp(img_cats{c}, 'motorbikes')
             % motorbikes
             training_data_bikes = cat(1,hist_matrix_bikes,...
@@ -159,6 +162,7 @@ function [labelsFaces, labelsCars]=pipeLine(img_used_for_training, mode)
             labelsBikes = zeros(t_num_of_img, 1); 
             labelsBikes(1:amount_of_images_bikes) = 1;
             labelsBikes(amount_of_images_bikes+1:end) = -1;
+            save([sampling(1), '_training_data_bikes', num2str(k), '.mat'], 'training_data_bikes');
         end
     end
     % Train the four classifies with the libsvm function
