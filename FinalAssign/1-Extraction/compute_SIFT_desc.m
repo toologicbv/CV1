@@ -1,6 +1,7 @@
 function sift_d=compute_SIFT_desc(I1, sample_mode)
     % binSize for dense sampling
-    binSize = 8;
+    binSize = 10;
+    stepSize = 20;
     % if necessary convert ot grayscale
     if size(I1,3) > 1
         I1 = single(rgb2gray(I1));
@@ -13,11 +14,11 @@ function sift_d=compute_SIFT_desc(I1, sample_mode)
         [~, sift_d] = vl_sift(I1);
     elseif strcmp(sample_mode, 'dense')
         % dense sampling
-        [~, sift_d] = vl_dsift(I1);
+        [~, sift_d] = vl_dsift(I1, 'size', binSize, 'step', stepSize, 'Fast');
     elseif strcmp(sample_mode, 'all')
         % compute both, point & dense
         [~, d1] = vl_sift(I1);
-        [~, d2] = vl_dsift(I1, 'size', binSize);
+        [~, d2] = vl_dsift(I1, 'size', binSize, 'step', stepSize, 'Fast');
         sift_d = cat(2, d1, d2);  
     end
     % we need to return the transpose because d is 128 x K
