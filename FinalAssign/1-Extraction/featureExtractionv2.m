@@ -50,7 +50,7 @@ function [SIFT_OUT,IMAGES_INDEX] = featureExtractionv2(root_dir, mode, sampling,
     for i=1:length(ifiles)
         % extract image ID
         imgID = str2double(ifiles(i).name(4:end-4));
-        imgFile = strcat(i_dir, ifiles(i).name); 
+        imgFile = strcat(i_dir, ifiles(i).name);
         Img = imread(imgFile);
 
         % if we also need to compute colorSIFT descriptors we need to

@@ -8,13 +8,11 @@ function sift_d=compute_SIFT_desc(I1, sample_mode)
     else
         I1 = single(I1);
     end
-    disp 'compute_SIFT_desc...'
     if strcmp(sample_mode, 'point')
         % sparse/point sampling
         [~, sift_d] = vl_sift(I1);
     elseif strcmp(sample_mode, 'dense')
         % dense sampling
-        disp 'dense sampling...'
         [~, sift_d] = vl_dsift(I1, 'size', binSize, 'step', stepSize, 'Fast');
     elseif strcmp(sample_mode, 'all')
         % compute both, point & dense

@@ -21,7 +21,7 @@ function pipeLine(img_used_for_training, mode, sampling, k)
 
     % root dirs for development
     
-    root_dir_maurits = '/Users/Maurits/Documents/UvA AI/Computer Vision/Final Project 3/Caltech4/ImageData';
+    root_dir_maurits = '/Users/Maurits/Desktop/ImageData';
     root_dir_jorg = 'S:/workspace/cv_final/ImageData';
     root_dir = root_dir_maurits;
     % for testing puposes
@@ -41,7 +41,7 @@ function pipeLine(img_used_for_training, mode, sampling, k)
     cspaces = '';
     % indicates whether the featureExtractionv2 function will store/save
     % the intermediate results to a file
-    save_data = false;
+    save_data = true;
     % number of k-means clusters
     % k = 200;
     % filename for k-means clusters...the codebook
@@ -168,10 +168,12 @@ function pipeLine(img_used_for_training, mode, sampling, k)
     end
     % Train the four classifies with the libsvm function
     if strcmp(mode, 'train') && notJorg
-        modelPlanes = svmtrain(labelsAirplanes, training_data_planes, '-c 1 -g 0.07 -b 1');
-        modelCars = svmtrain(labelsCars, training_data_cars, '-c 1 -g 0.07 -b 1');
-        modelFaces = svmtrain(labelsFaces, training_data_faces, '-c 1 -g 0.07 -b 1');
-        modelBikes = svmtrain(labelsBikes, training_data_bikes, '-c 1 -g 0.07 -b 1');
+        
+        modelPlanes = fitcsvm(training_data_planes, labelsAirplanes, 'KernelFunction', 'rbf', 'KernelScale', 'auto', 'Standardize', true);
+        modelCars = fitcsvm(training_data_cars, labelsCars, 'KernelFunction', 'rbf', 'KernelScale', 'auto', 'Standardize', true);
+        modelFaces = fitcsvm(training_data_faces, labelsFaces, 'KernelFunction', 'rbf', 'KernelScale', 'auto', 'Standardize', true);
+        modelBikes = fitcsvm(training_data_bikes, labelsBikes, 'KernelFunction', 'rbf', 'KernelScale', 'auto', 'Standardize', true);
+        
         % save the models to file, we'll need them for the prediction phase 
         save('modelPlanes.mat', 'modelPlanes');
         save('modelCars.mat', 'modelCars');
@@ -184,7 +186,7 @@ function pipeLine(img_used_for_training, mode, sampling, k)
         modelCars = loadMatrixFromFile('modelCars.mat');
         modelFaces = loadMatrixFromFile('modelFaces.mat');
         modelBikes = loadMatrixFromFile('modelBikes.mat');
-        % NEEDS IMPLEMENTATION....libsvm predict
+        
         
     end
     toc
